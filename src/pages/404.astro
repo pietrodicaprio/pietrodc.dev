@@ -1,0 +1,106 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import WavyLines from '../components/WavyLines.astro';
+import { localizePath } from '../i18n/utils';
+
+const home = localizePath('/', 'it');
+const tags = localizePath('/argomenti', 'it');
+---
+
+<SiteLayout title="Pagina non trovata" noindex>
+  <section class="nf container" aria-labelledby="nf-title">
+    <div class="nf__weave" aria-hidden="true"><WavyLines /></div>
+    <p class="nf__code" aria-hidden="true">404</p>
+    <h1 id="nf-title" class="nf__title">Questa pagina si è persa.</h1>
+    <p class="nf__sub">Il link è rotto o la pagina non esiste più. Capita, soprattutto mentre si costruisce.</p>
+    <div class="nf__actions">
+      <a class="nf__btn nf__btn--solid" href={home}>Torna al diario</a>
+      <a class="nf__btn nf__btn--ghost" href={tags}>Sfoglia gli argomenti</a>
+    </div>
+  </section>
+</SiteLayout>
+
+<style>
+  .nf {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-block: var(--space-8) var(--space-9);
+  }
+  .nf__weave {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    width: 100vw;
+    height: 460px;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    --wave-opacity: 0.26;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 25%, #000 60%, transparent 95%);
+    mask-image: linear-gradient(180deg, transparent, #000 25%, #000 60%, transparent 95%);
+  }
+  .nf > :not(.nf__weave) {
+    position: relative;
+    z-index: 1;
+  }
+  .nf__code {
+    font-family: var(--font-serif);
+    font-size: clamp(5rem, 18vw, 9rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .nf__title {
+    margin-top: var(--space-3);
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    color: var(--text);
+  }
+  .nf__sub {
+    margin-top: var(--space-3);
+    max-width: 42ch;
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--text-soft);
+  }
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  .nf__btn {
+    padding: 12px 24px;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .nf__btn:hover {
+    transform: translateY(-1px);
+  }
+  .nf__btn--solid {
+    background: var(--brand-gradient);
+    color: #fff;
+  }
+  .nf__btn--solid:hover {
+    box-shadow: var(--shadow-pop);
+  }
+  .nf__btn--ghost {
+    border: 1px solid var(--rule-strong);
+    color: var(--text-soft);
+    background: var(--surface);
+  }
+  .nf__btn--ghost:hover {
+    border-color: var(--accent-text);
+    color: var(--accent-text);
+  }
+</style>

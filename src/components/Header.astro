@@ -6,15 +6,17 @@ import type { Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
+  /** Explicit per-locale URLs (blog posts have different slugs per locale). */
+  localeAlternates?: Partial<Record<Lang, string>>;
 }
-const { lang } = Astro.props;
+const { lang, localeAlternates } = Astro.props;
 const t = useTranslations(lang);
 
 const home = localizePath('/', lang);
 const about = localizePath('/about', lang);
 const tags = localizePath('/argomenti', lang);
-const itHref = switchLocalePath(Astro.url, 'it');
-const enHref = switchLocalePath(Astro.url, 'en');
+const itHref = localeAlternates?.it ?? switchLocalePath(Astro.url, 'it');
+const enHref = localeAlternates?.en ?? switchLocalePath(Astro.url, 'en');
 
 // Active-link detection against the current path
 const norm = (h: string) => h.replace(/\/+$/, '') || '/';

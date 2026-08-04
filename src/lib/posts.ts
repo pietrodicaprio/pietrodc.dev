@@ -1,5 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import type { Lang } from '../i18n/ui';
+import { languages, type Lang } from '../i18n/ui';
+import { localizePath } from '../i18n/utils';
 
 export type Post = CollectionEntry<'blog'> & {
   lang: Lang;
@@ -38,6 +39,25 @@ export async function getPosts(lang: Lang): Promise<Post[]> {
 export async function getAllPosts(): Promise<Post[]> {
   const all = await getCollection('blog', ({ data }) => !isProd || !data.draft);
   return all.map((entry) => ({ ...entry, ...parseId(entry.id) }));
+}
+
+/**
+ * Per-locale URLs for a post: its own URL, and its counterpart in each other
+ * locale matched by `translationKey`. Falls back to that locale's home when no
+ * translation exists, so the language switcher never lands on a 404.
+ */
+export async function getPostAlternates(post: Post): Promise<Record<Lang, string>> {
+  const out = {} as Record<Lang, string>;
+  const key = post.data.translationKey;
+  for (const lang of Object.keys(languages) as Lang[]) {
+    if (lang === post.lang) {
+      out[lang] = localizePath(`/blog/${post.slug}`, lang);
+      continue;
+    }
+    const match = key ? (await getPosts(lang)).find((p) => p.data.translationKey === key) : undefined;
+    out[lang] = match ? localizePath(`/blog/${match.slug}`, lang) : localizePath('/', lang);
+  }
+  return out;
 }
 
 /** Approximate reading time in minutes, respecting an explicit override. */

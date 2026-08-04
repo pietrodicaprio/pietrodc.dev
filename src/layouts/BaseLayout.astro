@@ -18,9 +18,11 @@ interface Props {
   ogImage?: string;
   /** Keep the page out of search indexes (transactional pages). */
   noindex?: boolean;
+  /** Explicit per-locale URLs when the naive prefix-swap is wrong (blog posts). */
+  localeAlternates?: Partial<Record<keyof typeof languages, string>>;
 }
 
-const { title, description, ogImage, noindex } = Astro.props;
+const { title, description, ogImage, noindex, localeAlternates } = Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -35,7 +37,7 @@ const og = new URL(ogImage ?? '/og-default.png', Astro.site).href;
 // hreflang alternates for this exact page in every locale.
 const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map((l) => ({
   lang: l,
-  href: new URL(switchLocalePath(Astro.url, l), Astro.site).href,
+  href: new URL(localeAlternates?.[l] ?? switchLocalePath(Astro.url, l), Astro.site).href,
 }));
 ---
 
@@ -54,7 +56,7 @@ const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL(switchLocalePath(Astro.url, 'it'), Astro.site).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(localeAlternates?.it ?? switchLocalePath(Astro.url, 'it'), Astro.site).href} />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />

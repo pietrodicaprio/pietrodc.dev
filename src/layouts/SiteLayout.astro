@@ -13,13 +13,14 @@ interface Props {
   description?: string;
   ogImage?: string;
   noindex?: boolean;
+  localeAlternates?: Partial<Record<import('../i18n/ui').Lang, string>>;
 }
-const { title, description, ogImage, noindex } = Astro.props;
+const { title, description, ogImage, noindex, localeAlternates } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex}>
-  <Header slot="header" lang={lang} />
+<BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex} localeAlternates={localeAlternates}>
+  <Header slot="header" lang={lang} localeAlternates={localeAlternates} />
   <slot />
   <Footer slot="footer" lang={lang} />
   <EmailModal slot="footer" />

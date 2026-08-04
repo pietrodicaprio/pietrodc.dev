@@ -2,7 +2,7 @@
 import { render } from 'astro:content';
 import SiteLayout from '../../../layouts/SiteLayout.astro';
 import Article from '../../../components/Article.astro';
-import { getPosts } from '../../../lib/posts';
+import { getPosts, getPostAlternates } from '../../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = await getPosts('en');
@@ -12,9 +12,10 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const related = (await getPosts('en')).filter((p) => p.slug !== post.slug).slice(0, 3);
+const localeAlternates = await getPostAlternates(post);
 ---
 
-<SiteLayout title={post.data.title} description={post.data.excerpt}>
+<SiteLayout title={post.data.title} description={post.data.excerpt} localeAlternates={localeAlternates}>
   <Article post={post} related={related} lang="en">
     <Content />
   </Article>
