@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import WavyLines from './WavyLines.astro';
-import { useTranslations } from '../i18n/utils';
+import { useTranslations, localizePath } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const privacyHref = localizePath('privacy', lang);
 ---
 
 <section id="newsletter" class="news" aria-labelledby="news-title">
@@ -30,6 +31,9 @@ const t = useTranslations(lang);
         <span data-label-busy hidden>{t('news.sending')}</span>
       </button>
       <p class="news__status" data-status role="status" aria-live="polite"></p>
+      <p class="news__consent">
+        {t('news.consentPre')} <a href={privacyHref}>{t('news.consentLink')}</a>.
+      </p>
     </form>
   </div>
 </section>
@@ -52,7 +56,7 @@ const t = useTranslations(lang);
       busy.hidden = false;
       btn.disabled = true;
       try {
-        const res = await fetch('/api/subscribe', {
+        const res = await fetch('/api/subscribe/', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ email, locale: document.documentElement.lang }),
@@ -167,5 +171,16 @@ const t = useTranslations(lang);
     min-height: 1.2em;
     font-size: var(--text-xs);
     font-family: var(--font-mono);
+  }
+  .news__consent {
+    flex-basis: 100%;
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    opacity: 0.82;
+  }
+  .news__consent a {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 </style>

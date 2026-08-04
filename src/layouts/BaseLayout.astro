@@ -16,9 +16,11 @@ interface Props {
   description?: string;
   /** Absolute or root-relative OG image path. */
   ogImage?: string;
+  /** Keep the page out of search indexes (transactional pages). */
+  noindex?: boolean;
 }
 
-const { title, description, ogImage } = Astro.props;
+const { title, description, ogImage, noindex } = Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -49,6 +51,7 @@ const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map
 
     <title>{pageTitle}</title>
     <meta name="description" content={desc} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
     <link rel="alternate" hreflang="x-default" href={new URL(switchLocalePath(Astro.url, 'it'), Astro.site).href} />

@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import type { IconName } from '../lib/icons';
-import { useTranslations } from '../i18n/utils';
+import { useTranslations, localizePath } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const privacyHref = localizePath('privacy', lang);
 const year = 2026;
 // Same order as the About "Altrove" section: github, x, linkedin, mail, rss
 const social: { label: string; href?: string; icon: IconName; email?: boolean }[] = [
@@ -22,7 +23,7 @@ const social: { label: string; href?: string; icon: IconName; email?: boolean }[
 
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <span class="site-footer__copy">© {year} · PIETRO DI CAPRIO</span>
+    <span class="site-footer__copy">© {year} · PIETRO DI CAPRIO · <a href={privacyHref}>{t('footer.privacy')}</a></span>
     <nav class="site-footer__social" aria-label="Social">
       {social.map((s) =>
         s.email ? (
@@ -64,6 +65,17 @@ const social: { label: string; href?: string; icon: IconName; email?: boolean }[
     font-size: var(--text-xs);
     letter-spacing: 0.14em;
     color: var(--text-muted);
+  }
+  .site-footer__copy a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    transition: color var(--motion-fast) var(--ease-out), text-decoration-color var(--motion-fast) var(--ease-out);
+  }
+  .site-footer__copy a:hover {
+    color: var(--accent-text);
+    text-decoration-color: currentColor;
   }
   .site-footer__social {
     display: flex;

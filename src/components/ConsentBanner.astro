@@ -1,0 +1,165 @@
+---
+import { useTranslations, localizePath, getLangFromUrl } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const privacyHref = localizePath('privacy', lang);
+// Public Cloudflare Web Analytics site token (it ships in the page HTML for
+// every visitor, so it is not a secret). Keep CF Web Analytics in MANUAL mode:
+// edge auto-injection would load the beacon before consent and bypass the gate.
+// Override per-env with PUBLIC_CF_BEACON_TOKEN if needed.
+const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN ?? '4e8774eeccd947909ca7c789ff817b2a';
+---
+
+<aside class="consent" data-consent data-cf-token={cfToken} role="region" aria-label={t('consent.label')} hidden>
+  <div class="consent__text">
+    <p class="consent__title">{t('consent.title')}</p>
+    <p class="consent__body">
+      {t('consent.body')} <a href={privacyHref}>{t('consent.more')}</a>
+    </p>
+  </div>
+  <div class="consent__actions">
+    <button type="button" class="consent__btn consent__btn--ghost" data-consent-reject>{t('consent.reject')}</button>
+    <button type="button" class="consent__btn consent__btn--solid" data-consent-accept>{t('consent.accept')}</button>
+  </div>
+</aside>
+
+<script is:inline>
+  (() => {
+    const KEY = 'consent-analytics';
+    const el = document.querySelector('[data-consent]');
+    if (!el) return;
+    const token = el.getAttribute('data-cf-token') || '';
+
+    const loadBeacon = () => {
+      if (!token || document.querySelector('script[data-cf-beacon]')) return;
+      const s = document.createElement('script');
+      s.defer = true;
+      s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      s.setAttribute('data-cf-beacon', JSON.stringify({ token }));
+      document.head.appendChild(s);
+    };
+
+    const decision = localStorage.getItem(KEY);
+    if (decision === 'accepted') {
+      loadBeacon();
+      return; // already decided, stay hidden
+    }
+    if (decision === 'rejected') return;
+
+    // No decision yet: reveal the banner.
+    el.hidden = false;
+    el.setAttribute('data-open', '');
+
+    const decide = (value) => {
+      localStorage.setItem(KEY, value);
+      if (value === 'accepted') loadBeacon();
+      el.removeAttribute('data-open');
+      el.hidden = true;
+    };
+    el.querySelector('[data-consent-accept]').addEventListener('click', () => decide('accepted'));
+    el.querySelector('[data-consent-reject]').addEventListener('click', () => decide('rejected'));
+  })();
+</script>
+
+<style>
+  /* `display: flex` below outranks the [hidden] UA rule, so hiding must be
+     re-asserted at higher specificity or the banner never closes. */
+  .consent[hidden] {
+    display: none;
+  }
+  .consent {
+    position: fixed;
+    left: 50%;
+    bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 60;
+    width: min(680px, calc(100vw - 2 * var(--space-4)));
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    box-shadow: var(--shadow-pop, 0 24px 60px -28px rgba(31, 20, 54, 0.45));
+  }
+  .consent[data-open] {
+    animation: consent-in var(--motion-base, 240ms) var(--ease-out, ease) both;
+  }
+  @keyframes consent-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 12px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  .consent__text {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+  .consent__title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+  .consent__body {
+    margin-top: 4px;
+    font-size: var(--text-xs);
+    line-height: 1.55;
+    color: var(--text-soft);
+  }
+  .consent__body a {
+    color: var(--accent-text);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-text) 45%, transparent);
+  }
+  .consent__body a:hover {
+    opacity: 0.8;
+  }
+  .consent__actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+  .consent__btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: transform var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+  }
+  .consent__btn:hover {
+    transform: translateY(-1px);
+  }
+  .consent__btn--ghost {
+    border: 1px solid var(--rule-strong);
+    color: var(--text-soft);
+    background: transparent;
+  }
+  .consent__btn--solid {
+    background: var(--brand-gradient);
+    color: #fff;
+  }
+  @media (max-width: 520px) {
+    .consent {
+      gap: var(--space-3);
+    }
+    .consent__actions {
+      width: 100%;
+    }
+    .consent__btn {
+      flex: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .consent[data-open] {
+      animation: none;
+    }
+  }
+</style>

@@ -5,23 +5,26 @@ import Footer from '../components/Footer.astro';
 import EmailModal from '../components/EmailModal.astro';
 import SearchModal from '../components/SearchModal.astro';
 import A11yMenu from '../components/A11yMenu.astro';
+import ConsentBanner from '../components/ConsentBanner.astro';
 import { getLangFromUrl } from '../i18n/utils';
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
-const { title, description, ogImage } = Astro.props;
+const { title, description, ogImage, noindex } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage}>
+<BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex}>
   <Header slot="header" lang={lang} />
   <slot />
   <Footer slot="footer" lang={lang} />
   <EmailModal slot="footer" />
   <SearchModal slot="footer" />
   <A11yMenu slot="footer" />
+  <ConsentBanner slot="footer" />
 
 </BaseLayout>

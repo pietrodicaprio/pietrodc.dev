@@ -1,0 +1,10 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import NewsletterAction from '../../../components/NewsletterAction.astro';
+import { useTranslations } from '../../../i18n/utils';
+const t = useTranslations('en');
+---
+
+<SiteLayout title={t('nl.unsub.title')} noindex>
+  <NewsletterAction lang="en" action="unsub" />
+</SiteLayout>

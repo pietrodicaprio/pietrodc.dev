@@ -1,0 +1,10 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Privacy from '../components/Privacy.astro';
+import { useTranslations } from '../i18n/utils';
+const t = useTranslations('it');
+---
+
+<SiteLayout title={t('privacy.title')}>
+  <Privacy lang="it" />
+</SiteLayout>

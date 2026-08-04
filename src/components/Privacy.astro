@@ -1,0 +1,190 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+type Section = { h: string; p: string[] };
+const content: Record<
+  Lang,
+  { intro: string; updated: string; contact: string; contactCta: string; sections: Section[] }
+> = {
+  it: {
+    intro:
+      'Questo sito è il diario personale di Pietro Di Caprio. Raccolgo il minimo indispensabile e ti dico esattamente cosa e perché.',
+    updated: 'Ultimo aggiornamento: 4 agosto 2026',
+    contact: 'Per qualsiasi domanda, o per chiedere accesso, correzione o cancellazione dei tuoi dati:',
+    contactCta: 'Scrivimi',
+    sections: [
+      {
+        h: 'Newsletter',
+        p: [
+          'Se ti iscrivi, salvo il tuo indirizzo email in un database Cloudflare D1. Uso un doppio opt-in: ricevi una mail di conferma e sei iscritto solo dopo che clicchi. Senza conferma l’indirizzo resta inattivo e viene rimosso.',
+          'L’email serve solo a inviarti la newsletter, mai a scopi pubblicitari di terzi. La consegna passa da Resend, che come fornitore registra aperture e clic in forma aggregata per capire se le email arrivano e vengono lette. Puoi disiscriverti in ogni momento dal link in fondo a ogni mail: la disiscrizione è immediata.',
+        ],
+      },
+      {
+        h: 'Analitiche',
+        p: [
+          'Uso Cloudflare Web Analytics: è senza cookie e non traccia le persone singolarmente. Raccoglie dati aggregati e anonimi (pagine viste, provenienza, dispositivo) per capire cosa vale la pena scrivere.',
+          'Lo script di analitica viene caricato solo se dai il consenso dal banner. Se scegli “solo essenziali”, non parte nulla.',
+        ],
+      },
+      {
+        h: 'Preferenze salvate sul dispositivo',
+        p: [
+          'Tema, opzioni di accessibilità e la tua scelta sul banner restano nel localStorage del tuo browser. Non lasciano il tuo dispositivo e non arrivano a nessun server. Puoi cancellarle svuotando i dati del sito.',
+        ],
+      },
+      {
+        h: 'Con chi condivido i dati',
+        p: [
+          'Cloudflare, per hosting, database e analitiche. Resend, per l’invio delle email. Nessun altro. Non vendo né cedo dati a terzi.',
+        ],
+      },
+      {
+        h: 'I tuoi diritti',
+        p: [
+          'Puoi chiedere accesso, correzione o cancellazione dei tuoi dati usando i contatti qui sotto. Per la newsletter, la disiscrizione cancella o disattiva subito il tuo indirizzo.',
+        ],
+      },
+    ],
+  },
+  en: {
+    intro:
+      "This site is Pietro Di Caprio's personal journal. I collect the bare minimum and tell you exactly what and why.",
+    updated: 'Last updated: August 4, 2026',
+    contact: 'For any question, or to request access, correction, or deletion of your data:',
+    contactCta: 'Email me',
+    sections: [
+      {
+        h: 'Newsletter',
+        p: [
+          'If you subscribe, I store your email in a Cloudflare D1 database. I use double opt-in: you get a confirmation email and are subscribed only after you click. Without confirmation the address stays inactive and is removed.',
+          'Your email is used only to send you the newsletter, never for third-party advertising. Delivery goes through Resend, which as a processor records opens and clicks in aggregate to tell whether emails arrive and get read. You can unsubscribe any time from the link at the bottom of every email: it takes effect immediately.',
+        ],
+      },
+      {
+        h: 'Analytics',
+        p: [
+          'I use Cloudflare Web Analytics: it is cookieless and does not track people individually. It collects aggregate, anonymous data (page views, referrer, device) to help me see what is worth writing.',
+          'The analytics script loads only if you consent from the banner. If you pick "essential only", nothing runs.',
+        ],
+      },
+      {
+        h: 'Preferences stored on your device',
+        p: [
+          'Theme, accessibility options, and your banner choice stay in your browser localStorage. They never leave your device and never reach any server. You can clear them by wiping the site data.',
+        ],
+      },
+      {
+        h: 'Who I share data with',
+        p: [
+          'Cloudflare, for hosting, database, and analytics. Resend, for sending emails. No one else. I do not sell or hand data to third parties.',
+        ],
+      },
+      {
+        h: 'Your rights',
+        p: [
+          'You can request access, correction, or deletion of your data using the contact below. For the newsletter, unsubscribing deletes or deactivates your address right away.',
+        ],
+      },
+    ],
+  },
+};
+
+const c = content[lang];
+---
+
+<article class="privacy container">
+  <header class="privacy__head">
+    <h1 class="privacy__title">{t('privacy.title')}</h1>
+    <p class="privacy__intro">{c.intro}</p>
+    <p class="privacy__updated">{c.updated}</p>
+  </header>
+
+  {
+    c.sections.map((s) => (
+      <section class="privacy__section">
+        <h2 class="privacy__h2">{s.h}</h2>
+        {s.p.map((para) => (
+          <p class="privacy__p">{para}</p>
+        ))}
+      </section>
+    ))
+  }
+
+  <section class="privacy__section privacy__contact">
+    <h2 class="privacy__h2">{lang === 'it' ? 'Contatti' : 'Contact'}</h2>
+    <p class="privacy__p">{c.contact}</p>
+    <button type="button" class="privacy__cta" data-email-open>{c.contactCta}</button>
+  </section>
+</article>
+
+<style>
+  .privacy {
+    max-width: 44rem;
+    padding-block: var(--space-7) var(--space-8);
+  }
+  .privacy__head {
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: var(--space-6);
+  }
+  .privacy__title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    color: var(--text);
+  }
+  .privacy__intro {
+    margin-top: var(--space-3);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--text-soft);
+  }
+  .privacy__updated {
+    margin-top: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .privacy__section + .privacy__section {
+    margin-top: var(--space-6);
+  }
+  .privacy__h2 {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-2xl);
+    color: var(--text);
+    margin-bottom: var(--space-3);
+  }
+  .privacy__p {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text);
+  }
+  .privacy__p + .privacy__p {
+    margin-top: var(--space-3);
+  }
+  .privacy__cta {
+    margin-top: var(--space-4);
+    padding: 11px 24px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-gradient);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .privacy__cta:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-pop);
+  }
+</style>

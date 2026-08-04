@@ -87,6 +87,10 @@ function rehypeSectionAnchors() {
 export default defineConfig({
   site,
   trailingSlash: 'always',
+  // All API mutations are opaque-token gated with no cookie/session auth, so the
+  // origin check protects nothing here and would block the legitimate RFC 8058
+  // one-click unsubscribe POST that mail providers send cross-origin.
+  security: { checkOrigin: false },
   adapter: cloudflare({
     imageService: 'compile',
     platformProxy: { enabled: true },
@@ -102,7 +106,11 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [
     mdx(),
-    sitemap({ i18n: { defaultLocale: 'it', locales: { it: 'it', en: 'en' } } }),
+    sitemap({
+      i18n: { defaultLocale: 'it', locales: { it: 'it', en: 'en' } },
+      // Transactional confirm/unsubscribe pages are noindex; keep them out.
+      filter: (page) => !/\/newsletter\//.test(page),
+    }),
   ],
   markdown: {
     // Exclude mermaid from Shiki so the raw ```mermaid fence survives for

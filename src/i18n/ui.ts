@@ -46,6 +46,34 @@ export const ui = {
     'news.check': 'Controlla la posta per confermare.',
     'news.error': 'Qualcosa è andato storto. Riprova.',
     'news.emailLabel': 'Il tuo indirizzo email',
+    'news.consentPre': 'Iscrivendoti accetti la',
+    'news.consentLink': 'privacy policy',
+
+    'nl.back': 'Torna al blog',
+    'nl.missing': 'Link non valido: manca il codice di conferma.',
+    'nl.confirm.title': 'Conferma iscrizione',
+    'nl.confirm.lead': 'Un ultimo clic e sei dentro. Confermi di voler ricevere le mie email?',
+    'nl.confirm.cta': 'Sì, confermo',
+    'nl.confirm.busy': 'Confermo…',
+    'nl.confirm.done': 'Ci sei.',
+    'nl.confirm.doneBody': 'Iscrizione confermata. Ti ho scritto una mail di benvenuto.',
+    'nl.confirm.fail': 'Link scaduto o già confermato. Se serve, iscriviti di nuovo dal blog.',
+    'nl.unsub.title': 'Disiscrizione',
+    'nl.unsub.lead': 'Vuoi smettere di ricevere le mie email? Nessun problema.',
+    'nl.unsub.cta': 'Disiscrivimi',
+    'nl.unsub.busy': 'Procedo…',
+    'nl.unsub.done': 'Fatto.',
+    'nl.unsub.doneBody': 'Non riceverai più email. Puoi tornare quando vuoi.',
+    'nl.unsub.fail': 'Qualcosa è andato storto. Riprova più tardi.',
+
+    'consent.title': 'Un attimo di trasparenza',
+    'consent.body': 'Uso analitiche anonime e senza cookie per capire cosa leggi. Le attivo solo se sei d’accordo.',
+    'consent.accept': 'Va bene',
+    'consent.reject': 'Solo essenziali',
+    'consent.more': 'Dettagli',
+    'consent.label': 'Preferenze di privacy',
+
+    'privacy.title': 'Privacy e cookie',
 
     'about.eyebrow': 'About',
     'about.title': 'Ciao, sono Pietro.',
@@ -98,6 +126,7 @@ export const ui = {
 
     'lang.switch': 'Cambia lingua',
     'footer.rights': 'Tutti i diritti riservati',
+    'footer.privacy': 'Privacy',
   },
   en: {
     'site.title': 'Pietro Di Caprio',
@@ -139,6 +168,34 @@ export const ui = {
     'news.check': 'Check your inbox to confirm.',
     'news.error': 'Something went wrong. Try again.',
     'news.emailLabel': 'Your email address',
+    'news.consentPre': 'By subscribing you accept the',
+    'news.consentLink': 'privacy policy',
+
+    'nl.back': 'Back to the blog',
+    'nl.missing': 'Invalid link: the confirmation code is missing.',
+    'nl.confirm.title': 'Confirm subscription',
+    'nl.confirm.lead': "One last click and you're in. Confirm you want to get my emails?",
+    'nl.confirm.cta': 'Yes, confirm',
+    'nl.confirm.busy': 'Confirming…',
+    'nl.confirm.done': "You're in.",
+    'nl.confirm.doneBody': "Subscription confirmed. I've sent you a welcome email.",
+    'nl.confirm.fail': 'Link expired or already confirmed. If needed, subscribe again from the blog.',
+    'nl.unsub.title': 'Unsubscribe',
+    'nl.unsub.lead': 'Want to stop getting my emails? No problem.',
+    'nl.unsub.cta': 'Unsubscribe me',
+    'nl.unsub.busy': 'Working…',
+    'nl.unsub.done': 'Done.',
+    'nl.unsub.doneBody': "You won't get any more emails. Come back whenever you like.",
+    'nl.unsub.fail': 'Something went wrong. Try again later.',
+
+    'consent.title': 'A moment of transparency',
+    'consent.body': 'I use anonymous, cookieless analytics to see what you read. I only turn them on if you agree.',
+    'consent.accept': 'Sounds good',
+    'consent.reject': 'Essential only',
+    'consent.more': 'Details',
+    'consent.label': 'Privacy preferences',
+
+    'privacy.title': 'Privacy and cookies',
 
     'about.eyebrow': 'About',
     'about.title': "Hi, I'm Pietro.",
@@ -191,6 +248,7 @@ export const ui = {
 
     'lang.switch': 'Switch language',
     'footer.rights': 'All rights reserved',
+    'footer.privacy': 'Privacy',
   },
 } as const;
 

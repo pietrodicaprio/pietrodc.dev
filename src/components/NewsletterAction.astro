@@ -1,0 +1,171 @@
+---
+import WavyLines from './WavyLines.astro';
+import { useTranslations, localizePath } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  action: 'confirm' | 'unsub';
+}
+const { lang, action } = Astro.props;
+const t = useTranslations(lang);
+const k = (s: string) => t(`nl.${action}.${s}` as never);
+const endpoint = action === 'confirm' ? '/api/confirm/' : '/api/unsubscribe/';
+const backHref = localizePath('', lang);
+
+const strings = {
+  busy: k('busy'),
+  done: k('done'),
+  doneBody: k('doneBody'),
+  fail: k('fail'),
+  missing: t('nl.missing'),
+  endpoint,
+  action,
+};
+---
+
+<section class="nlact container" aria-labelledby="nlact-title">
+  <div class="nlact__weave" aria-hidden="true"><WavyLines /></div>
+  <div class="nlact__card" data-nlact>
+    <h1 id="nlact-title" class="nlact__title" data-title>{k('title')}</h1>
+    <p class="nlact__lead" data-lead>{k('lead')}</p>
+    <button type="button" class="nlact__cta" data-action>
+      <span data-idle>{k('cta')}</span>
+      <span data-busy hidden>{k('busy')}</span>
+    </button>
+    <p class="nlact__status" data-status role="status" aria-live="polite"></p>
+    <a class="nlact__back" href={backHref}>{t('nl.back')} <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<script is:inline define:vars={{ s: strings }}>
+  const root = document.querySelector('[data-nlact]');
+  if (root) {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    const btn = root.querySelector('[data-action]');
+    const idle = root.querySelector('[data-idle]');
+    const busy = root.querySelector('[data-busy]');
+    const status = root.querySelector('[data-status]');
+    const lead = root.querySelector('[data-lead]');
+
+    const finish = (title, body, ok) => {
+      root.querySelector('[data-title]').textContent = title;
+      lead.textContent = body;
+      lead.dataset.state = ok ? 'ok' : 'fail';
+      btn.remove();
+      status.textContent = '';
+    };
+
+    if (!token) {
+      btn.disabled = true;
+      status.textContent = s.missing;
+    } else {
+      btn.addEventListener('click', async () => {
+        idle.hidden = true;
+        busy.hidden = false;
+        btn.disabled = true;
+        try {
+          const res = await fetch(s.endpoint, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+          if (res.ok) finish(s.done, s.doneBody, true);
+          else finish(s.done, s.fail, false);
+        } catch {
+          idle.hidden = false;
+          busy.hidden = true;
+          btn.disabled = false;
+          status.textContent = s.fail;
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  .nlact {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-block: var(--space-8) var(--space-9);
+  }
+  .nlact__weave {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    width: 100vw;
+    height: 420px;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    --wave-opacity: 0.24;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 25%, #000 60%, transparent 95%);
+    mask-image: linear-gradient(180deg, transparent, #000 25%, #000 60%, transparent 95%);
+  }
+  .nlact__card {
+    position: relative;
+    z-index: 1;
+    max-width: 34rem;
+    width: 100%;
+    text-align: center;
+    padding: clamp(var(--space-5), 5vw, var(--space-7));
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+  }
+  .nlact__title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    color: var(--text);
+  }
+  .nlact__lead {
+    margin-top: var(--space-3);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--text-soft);
+  }
+  .nlact__lead[data-state='ok'] {
+    color: var(--text);
+  }
+  .nlact__cta {
+    margin-top: var(--space-5);
+    padding: 13px 28px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-gradient);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .nlact__cta:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+  }
+  .nlact__cta:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+  .nlact__status {
+    margin-top: var(--space-3);
+    min-height: 1.2em;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .nlact__back {
+    display: inline-block;
+    margin-top: var(--space-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  .nlact__back:hover {
+    opacity: 0.8;
+  }
+</style>

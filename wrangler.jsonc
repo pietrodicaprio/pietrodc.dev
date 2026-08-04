@@ -9,13 +9,20 @@
   // Keep the short workers.dev preview URL (pietrodc.<subdomain>.workers.dev).
   // The custom domain pietrodc.dev is added later, not here.
   "workers_dev": true,
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 
-  // Newsletter (Phase 6) will add a D1 binding here. Left out for now so a
-  // preview deploy doesn't require an existing database:
-  //   pnpm wrangler d1 create pietrodc-newsletter
-  //   -> paste the returned database_id, then re-add:
-  // "d1_databases": [
-  //   { "binding": "DB", "database_name": "pietrodc-newsletter", "database_id": "<id>" }
-  // ]
+  // Newsletter store (double opt-in subscribers).
+  "d1_databases": [
+    { "binding": "DB", "database_name": "pietrodc-newsletter", "database_id": "0d9e518e-217d-4159-bc75-d80ffaab2287", "migrations_dir": "migrations" }
+  ],
+
+  // Non-secret config. RESEND_API_KEY is a secret, set out of band:
+  //   pnpm wrangler secret put RESEND_API_KEY
+  // Local dev reads it from .dev.vars (gitignored).
+  "vars": {
+    // Verified Resend sender. Until pietrodc.dev is verified in Resend, local
+    // dev overrides this with onboarding@resend.dev via .dev.vars.
+    "RESEND_FROM": "Pietro Di Caprio <newsletter@pietrodc.dev>",
+    "RESEND_REPLY_TO": "pietro@fabricators.ltd"
+  }
 }
