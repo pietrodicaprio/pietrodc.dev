@@ -2,7 +2,7 @@
 import PostCard from './PostCard.astro';
 import Chip from './Chip.astro';
 import Pagination from './Pagination.astro';
-import { readingTime, type Post } from '../lib/posts';
+import { readingTime, getUsedTags, type Post } from '../lib/posts';
 import { useTranslations, localizePath, tagLabel } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -16,7 +16,8 @@ interface Props {
 }
 const { lang, tag, page, total } = Astro.props;
 const t = useTranslations(lang);
-const tags: Tag[] = ['software', 'prodotto', 'imprenditoria', 'community'];
+// Only tags with visible posts, so chips never link to an empty (404) archive.
+const tags = await getUsedTags(lang);
 const totalMins = page.data.reduce((s, p) => s + readingTime(p), 0);
 const makeUrl = (n: number) =>
   localizePath(n === 1 ? `/argomenti/${tag}` : `/argomenti/${tag}/${n}`, lang);
