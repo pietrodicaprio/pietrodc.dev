@@ -1,0 +1,209 @@
+/* ============================================================
+   Design tokens — "Trama" direction
+   Extracted from the Claude Design source, dark theme derived.
+   Light is the authored surface; dark keeps the same warm accents
+   on a deep plum ground so the gradient identity survives.
+   ============================================================ */
+
+:root {
+  /* Brand accents (stable across themes) */
+  --accent-purple: #7c4fdb;
+  --accent-purple-2: #b39ddb;
+  --accent-pink: #e8557f;
+  --accent-coral: #f19b7c;
+  --accent-amber: #fbba7c;
+  --brand-gradient: linear-gradient(120deg, #7c4fdb, #e8557f, #fbba7c);
+  --brand-gradient-h: linear-gradient(90deg, #7c4fdb, #e8557f, #fbba7c);
+
+  /* Type — two-sans system: Jost for display/identity, Inter for reading */
+  --font-sans: 'Jost Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-text: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Menlo', monospace;
+
+  /* Fluid type scale (clamp: min / preferred / max) */
+  --text-xs: 0.6875rem;   /* 11px labels/meta */
+  --text-sm: 0.8125rem;   /* 13px */
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --text-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.5rem);
+  --text-3xl: clamp(2.25rem, 1.7rem + 2.8vw, 3.5rem);
+
+  --leading-tight: 1.12;
+  --leading-snug: 1.35;
+  --leading-body: 1.72;
+  --tracking-label: 0.28em;
+  --tracking-mono: 0.08em;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Radii */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --measure: 68ch;       /* article reading width */
+  --container: 1240px;   /* page max width */
+
+  --transition: 0.2s ease;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-fast: 160ms;
+}
+
+/* ---------- Light (authored) ---------- */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #fbf8fc;
+  --bg-glow-1: rgba(124, 79, 219, 0.09);
+  --bg-glow-2: rgba(232, 85, 127, 0.08);
+  --bg-glow-3: rgba(251, 186, 124, 0.07);
+
+  --surface: #ffffff;
+  --surface-2: #faf6fe;
+
+  --text: #1f1436;
+  --text-soft: #4a3a6b;
+  /* AA-compliant on white/near-white (>=4.5:1); the design's #8b7ba8 failed */
+  --text-muted: #6c5d89;
+
+  --rule: #f0eaf5;
+  --rule-strong: #e2d8ef;
+
+  --shadow-card: 0 40px 100px -60px rgba(124, 79, 219, 0.35), 0 1px 0 rgba(31, 20, 54, 0.04);
+  --shadow-pop: 0 20px 60px -30px rgba(124, 79, 219, 0.3);
+
+  --wave-opacity: 0.55;
+
+  /* Category chips */
+  --chip-software-bg: #efe7f5;
+  --chip-software-text: #5a3ebd;
+  --chip-prodotto-bg: #fce4ec;
+  --chip-prodotto-text: #b02a5c;
+  --chip-imprenditoria-bg: #ffeee1;
+  --chip-imprenditoria-text: #955330;
+  --chip-community-bg: #e8eaff;
+  --chip-community-text: #5257d6;
+
+  --illus-software-bg: linear-gradient(135deg, #f5eefb 0%, #fbf6fe 100%);
+  --illus-prodotto-bg: linear-gradient(135deg, #fdf3f5 0%, #fff6ee 100%);
+  --illus-imprenditoria-bg: linear-gradient(135deg, #fff6ec 0%, #fff9df 100%);
+  --illus-community-bg: linear-gradient(135deg, #eef0ff 0%, #f7f6fe 100%);
+  --illus-stroke-software: #5a3ebd;
+  --illus-stroke-prodotto: #c13867;
+  --illus-stroke-imprenditoria: #b36b48;
+  --illus-stroke-community: #5257d6;
+
+  --focus-ring: #7c4fdb;
+  /* Accent used as TEXT (AA on light); brighter variant in dark below */
+  --accent-text: #7c4fdb;
+  --selection-bg: #1f1436;
+  --selection-fg: #ffffff;
+}
+
+/* ---------- Dark (authored, Trama dark = mock 4D) ----------
+   Values lifted from the design: deep-indigo ground #14092A, glassy
+   cards, brightened accents. Grouped in a custom property block so the
+   OS-preference fallback below can reuse it verbatim. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #14092a;
+  --bg-glow-1: rgba(124, 79, 219, 0.14);
+  --bg-glow-2: rgba(232, 85, 127, 0.1);
+  --bg-glow-3: rgba(251, 186, 124, 0.07);
+
+  --surface: #1b1436;
+  --surface-2: #241a40;
+
+  --text: #f0e9f5;
+  --text-soft: #b0a3c4;
+  --text-muted: #a99ac2;
+
+  --rule: rgba(255, 255, 255, 0.08);
+  --rule-strong: rgba(255, 255, 255, 0.14);
+
+  --shadow-card: 0 40px 100px -50px rgba(124, 79, 219, 0.55), 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-pop: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
+
+  --wave-opacity: 0.5;
+
+  --chip-software-bg: rgba(124, 79, 219, 0.22);
+  --chip-software-text: #d5c0f5;
+  --chip-prodotto-bg: rgba(232, 85, 127, 0.2);
+  --chip-prodotto-text: #f5b6c8;
+  --chip-imprenditoria-bg: rgba(251, 186, 124, 0.22);
+  --chip-imprenditoria-text: #f5c9a6;
+  --chip-community-bg: rgba(129, 140, 248, 0.22);
+  --chip-community-text: #b8bdff;
+
+  --illus-software-bg: linear-gradient(135deg, rgba(124, 79, 219, 0.2), rgba(124, 79, 219, 0.05));
+  --illus-prodotto-bg: linear-gradient(135deg, rgba(232, 85, 127, 0.2), rgba(251, 186, 124, 0.1));
+  --illus-imprenditoria-bg: linear-gradient(135deg, rgba(251, 186, 124, 0.2), rgba(232, 85, 127, 0.08));
+  --illus-community-bg: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(124, 79, 219, 0.06));
+  /* Lighter illustration strokes so line art reads on the dark ground */
+  --illus-stroke-software: #d5c0f5;
+  --illus-stroke-prodotto: #f5b6c8;
+  --illus-stroke-imprenditoria: #f5c9a6;
+  --illus-stroke-community: #b8bdff;
+
+  --focus-ring: #b39ddb;
+  --accent-text: #c3a8ff;
+  --selection-bg: #f0e9f5;
+  --selection-fg: #14092a;
+}
+
+/* Follow OS when the user hasn't chosen explicitly (same values as above) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #14092a;
+    --bg-glow-1: rgba(124, 79, 219, 0.14);
+    --bg-glow-2: rgba(232, 85, 127, 0.1);
+    --bg-glow-3: rgba(251, 186, 124, 0.07);
+    --surface: #1b1436;
+    --surface-2: #241a40;
+    --text: #f0e9f5;
+    --text-soft: #b0a3c4;
+    --text-muted: #a99ac2;
+    --rule: rgba(255, 255, 255, 0.08);
+    --rule-strong: rgba(255, 255, 255, 0.14);
+    --shadow-card: 0 40px 100px -50px rgba(124, 79, 219, 0.55), 0 1px 0 rgba(255, 255, 255, 0.03);
+    --shadow-pop: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
+    --wave-opacity: 0.5;
+    --chip-software-bg: rgba(124, 79, 219, 0.22);
+    --chip-software-text: #d5c0f5;
+    --chip-prodotto-bg: rgba(232, 85, 127, 0.2);
+    --chip-prodotto-text: #f5b6c8;
+    --chip-imprenditoria-bg: rgba(251, 186, 124, 0.22);
+    --chip-imprenditoria-text: #f5c9a6;
+    --chip-community-bg: rgba(129, 140, 248, 0.22);
+    --chip-community-text: #b8bdff;
+    --illus-software-bg: linear-gradient(135deg, rgba(124, 79, 219, 0.2), rgba(124, 79, 219, 0.05));
+    --illus-prodotto-bg: linear-gradient(135deg, rgba(232, 85, 127, 0.2), rgba(251, 186, 124, 0.1));
+    --illus-imprenditoria-bg: linear-gradient(135deg, rgba(251, 186, 124, 0.2), rgba(232, 85, 127, 0.08));
+    --illus-community-bg: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(124, 79, 219, 0.06));
+    --illus-stroke-software: #d5c0f5;
+    --illus-stroke-prodotto: #f5b6c8;
+    --illus-stroke-imprenditoria: #f5c9a6;
+    --illus-stroke-community: #b8bdff;
+    --focus-ring: #b39ddb;
+    --accent-text: #c3a8ff;
+    --selection-bg: #f0e9f5;
+    --selection-fg: #14092a;
+  }
+}

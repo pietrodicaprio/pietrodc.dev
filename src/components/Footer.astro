@@ -1,0 +1,103 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from '../lib/icons';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const year = 2026;
+// Same order as the About "Altrove" section: github, x, linkedin, mail, rss
+const social: { label: string; href?: string; icon: IconName; email?: boolean }[] = [
+  { label: 'GitHub', href: 'https://github.com/pietrodicaprio', icon: 'github' },
+  { label: 'X', href: 'https://x.com/pietrodc0', icon: 'x' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/pietro-di-caprio', icon: 'linkedin' },
+  { label: 'Mail', icon: 'mail', email: true },
+  { label: 'RSS', href: lang === 'it' ? '/rss.xml' : '/en/rss.xml', icon: 'rss-feed' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <span class="site-footer__copy">© {year} · PIETRO DI CAPRIO</span>
+    <nav class="site-footer__social" aria-label="Social">
+      {social.map((s) =>
+        s.email ? (
+          <button type="button" class="site-footer__icon" data-email-open>
+            <Icon name={s.icon} size={20} />
+            <span class="sr-only">{s.label}</span>
+          </button>
+        ) : (
+          <a
+            href={s.href}
+            class="site-footer__icon"
+            rel={s.href?.startsWith('http') ? 'me noopener' : undefined}
+          >
+            <Icon name={s.icon} size={20} />
+            <span class="sr-only">{s.label}</span>
+          </a>
+        )
+      )}
+    </nav>
+    <span class="site-footer__tagline">{t('site.tagline')}</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-9);
+    border-top: 1px solid var(--rule);
+  }
+  .site-footer__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding-block: var(--space-6);
+  }
+  .site-footer__copy {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+  }
+  .site-footer__social {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--text-muted);
+  }
+  .site-footer__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    transition: color var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out),
+      transform var(--motion-fast) var(--ease-out);
+  }
+  .site-footer__icon:hover {
+    color: var(--chip-software-text);
+    background: var(--chip-software-bg);
+    transform: translateY(-1px);
+    opacity: 1;
+  }
+  .site-footer__tagline {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-base);
+    color: var(--text-soft);
+  }
+  @media (max-width: 560px) {
+    .site-footer__inner {
+      justify-content: center;
+      text-align: center;
+    }
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SiteLayout from '../../../layouts/SiteLayout.astro';
+import Archive from '../../../components/Archive.astro';
+import { getPosts } from '../../../lib/posts';
+import { tagLabel } from '../../../i18n/utils';
+
+type Tag = 'software' | 'prodotto' | 'imprenditoria' | 'community';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const tags: Tag[] = ['software', 'prodotto', 'imprenditoria', 'community'];
+  const posts = await getPosts('it');
+  return tags.flatMap((tag) =>
+    paginate(
+      posts.filter((p) => p.data.tag === tag),
+      { pageSize: 6, params: { tag } }
+    )
+  );
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const tag = Astro.params.tag as Tag;
+const total = (await getPosts('it')).filter((p) => p.data.tag === tag).length;
+---
+
+<SiteLayout title={`${tagLabel(tag, 'it')}`}>
+  <Archive lang="it" tag={tag} page={page} total={total} />
+</SiteLayout>

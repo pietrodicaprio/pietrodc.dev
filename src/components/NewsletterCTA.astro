@@ -1,0 +1,171 @@
+---
+import Icon from './Icon.astro';
+import WavyLines from './WavyLines.astro';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section id="newsletter" class="news" aria-labelledby="news-title">
+  <WavyLines variant="light" class="news__waves" />
+  <div class="news__inner">
+    <div class="news__copy">
+      <p class="news__eyebrow">{t('news.eyebrow')}</p>
+      <h2 id="news-title" class="news__title">{t('news.title')}</h2>
+      <p class="news__body">{t('news.body')}</p>
+    </div>
+    <form class="news__form" data-newsletter novalidate>
+      <label class="sr-only" for="news-email">{t('news.emailLabel')}</label>
+      <div class="news__field">
+        <Icon name="mail" size={16} />
+        <input id="news-email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder={t('news.placeholder')} />
+      </div>
+      <button type="submit" class="news__cta">
+        <span data-label-idle>{t('news.cta')} <span aria-hidden="true">→</span></span>
+        <span data-label-busy hidden>{t('news.sending')}</span>
+      </button>
+      <p class="news__status" data-status role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<script is:inline define:vars={{ okMsg: t('news.check'), errMsg: t('news.error') }}>
+  const form = document.querySelector('[data-newsletter]');
+  if (form) {
+    const status = form.querySelector('[data-status]');
+    const idle = form.querySelector('[data-label-idle]');
+    const busy = form.querySelector('[data-label-busy]');
+    const btn = form.querySelector('.news__cta');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = new FormData(form).get('email');
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
+        status.textContent = errMsg;
+        return;
+      }
+      idle.hidden = true;
+      busy.hidden = false;
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, locale: document.documentElement.lang }),
+        });
+        status.textContent = res.ok ? okMsg : errMsg;
+        if (res.ok) form.reset();
+      } catch {
+        status.textContent = errMsg;
+      } finally {
+        idle.hidden = false;
+        busy.hidden = true;
+        btn.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .news {
+    position: relative;
+    margin-top: var(--space-8);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(120deg, #7c4fdb 0%, #e8557f 52%, #fbba7c 100%);
+    box-shadow: var(--shadow-card);
+  }
+  .news :global(.news__waves) {
+    --wave-opacity: 0.5;
+    z-index: 0;
+  }
+  .news__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    padding: clamp(var(--space-5), 4vw, var(--space-7));
+  }
+  .news__copy {
+    max-width: 34ch;
+  }
+  .news__eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .news__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    line-height: 1.1;
+  }
+  .news__body {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    opacity: 0.92;
+  }
+  .news__form {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .news__field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  .news__field input {
+    background: none;
+    border: none;
+    color: #fff;
+    font: inherit;
+    font-size: var(--text-sm);
+    min-width: 180px;
+    outline: none;
+  }
+  .news__field input::placeholder {
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .news__cta {
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    background: #fff;
+    color: #1f1436;
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+  .news__cta:hover {
+    transform: translateY(-1px);
+  }
+  .news__cta:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+  .news__status {
+    flex-basis: 100%;
+    min-height: 1.2em;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+  }
+</style>

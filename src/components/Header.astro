@@ -1,0 +1,612 @@
+---
+import Icon from './Icon.astro';
+import Avatar from './Avatar.astro';
+import { useTranslations, localizePath, switchLocalePath } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const home = localizePath('/', lang);
+const about = localizePath('/about', lang);
+const tags = localizePath('/argomenti', lang);
+const itHref = switchLocalePath(Astro.url, 'it');
+const enHref = switchLocalePath(Astro.url, 'en');
+
+// Active-link detection against the current path
+const norm = (h: string) => h.replace(/\/+$/, '') || '/';
+const current = norm(Astro.url.pathname);
+const isActive = (h: string) => norm(h) === current;
+// A section is active if the path is under it (e.g. /argomenti/software)
+const inSection = (h: string) => {
+  const n = norm(h);
+  return n !== '/' && (current === n || current.startsWith(n + '/'));
+};
+
+const nav = [
+  { href: about, label: t('nav.about'), active: inSection(about) },
+  { href: tags, label: t('nav.tags'), active: inSection(tags) },
+];
+// Same order as the About "Altrove" section: github, x, linkedin, mail, rss
+const social: { label: string; href?: string; email?: boolean }[] = [
+  { label: 'github', href: 'https://github.com/pietrodicaprio' },
+  { label: 'x', href: 'https://x.com/pietrodc0' },
+  { label: 'linkedin', href: 'https://www.linkedin.com/in/pietro-di-caprio' },
+  { label: 'mail', email: true },
+  { label: 'rss', href: lang === 'it' ? '/rss.xml' : '/en/rss.xml' },
+];
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href={home} class="brand" aria-label={t('site.title')}>
+      <Avatar size={40} glow eager />
+      <span class="brand__text">
+        <span class="brand__name">{t('site.title')}</span>
+        <span class="brand__handle">{t('site.handle')}</span>
+      </span>
+    </a>
+
+    <nav class="nav-desktop" aria-label={t('nav.menu')}>
+      {nav.map((item) => (
+        <a href={item.href} class="nav-link" aria-current={item.active ? 'page' : undefined}>{item.label}</a>
+      ))}
+
+      <button type="button" class="search-pill" data-search-open aria-haspopup="dialog" aria-keyshortcuts="Meta+K Control+K">
+        <Icon name="search" size={14} />
+        <span>{t('nav.search')}</span>
+        <kbd>⌘K</kbd>
+      </button>
+
+      <div class="lang-switch" role="group" aria-label={t('lang.switch')}>
+        <a href={itHref} class="lang" aria-current={lang === 'it' ? 'true' : undefined}>IT</a>
+        <span aria-hidden="true" class="lang__sep">·</span>
+        <a href={enHref} class="lang" aria-current={lang === 'en' ? 'true' : undefined}>EN</a>
+      </div>
+
+      <button type="button" class="theme-toggle" data-theme-toggle>
+        <Icon class="i-sun" name="sun-light" size={17} />
+        <Icon class="i-moon" name="half-moon" size={16} />
+        <span class="sr-only">{t('a11y.theme')}</span>
+      </button>
+
+      <a href={`${home}#newsletter`} class="btn-primary brand-flow">{t('nav.subscribe')}</a>
+    </nav>
+
+    <button type="button" class="hamburger" data-drawer-open aria-haspopup="dialog" aria-expanded="false" aria-controls="mobile-drawer">
+      <Icon name="menu" size={20} />
+      <span class="sr-only">{t('nav.menu')}</span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div id="mobile-drawer" class="drawer" data-drawer inert>
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label={t('nav.menu')}>
+    <div class="drawer__head">
+      <span class="brand">
+        <Avatar size={40} glow />
+        <span class="brand__text">
+          <span class="brand__name">{t('site.title')}</span>
+          <span class="brand__handle">{t('site.handle')}</span>
+        </span>
+      </span>
+      <button type="button" class="drawer__close" data-drawer-close>
+        <Icon name="xmark" size={22} />
+        <span class="sr-only">{t('nav.closeMenu')}</span>
+      </button>
+    </div>
+
+    <nav class="drawer__nav" aria-label={t('nav.menu')}>
+      <a href={home} aria-current={isActive(home) ? 'page' : undefined}><span>{t('nav.home')}</span><em>01 · HOME</em></a>
+      <a href={tags} aria-current={inSection(tags) ? 'page' : undefined}><span>{t('nav.tags')}</span><em>02 · TAGS</em></a>
+      <a href={about} aria-current={inSection(about) ? 'page' : undefined}><span>{t('nav.about')}</span><em>03 · ABOUT</em></a>
+      <button type="button" data-search-open><span>{t('nav.search')}</span><em>⌘K</em></button>
+    </nav>
+
+    <div class="drawer__controls">
+      <div class="drawer__lang" role="group" aria-label={t('lang.switch')}>
+        <span class="drawer__langlabel">{t('lang.switch')}</span>
+        <a href={itHref} class="lang" aria-current={lang === 'it' ? 'true' : undefined}>IT</a>
+        <a href={enHref} class="lang" aria-current={lang === 'en' ? 'true' : undefined}>EN</a>
+      </div>
+      <div class="drawer__themerow" role="group" aria-label={t('a11y.theme')}>
+        <span class="drawer__langlabel">{t('a11y.theme')}</span>
+        <button type="button" class="drawer__themebtn" data-theme-toggle>
+          <Icon class="i-sun" name="sun-light" size={16} />
+          <Icon class="i-moon" name="half-moon" size={15} />
+          <span class="sr-only">{t('a11y.theme')}</span>
+        </button>
+      </div>
+    </div>
+
+    <a href={`${home}#newsletter`} class="drawer__news">
+      <span class="drawer__newslabel">{t('news.eyebrow')}</span>
+      <span class="drawer__newstitle">{t('news.title')}</span>
+      <span class="drawer__newscta">{t('nav.subscribe')} <span aria-hidden="true">→</span></span>
+    </a>
+
+    <div class="drawer__social">
+      {social.map((s) =>
+        s.email ? (
+          <button type="button" data-email-open>/{t('email.label')}</button>
+        ) : (
+          <a href={s.href} rel="me noopener">/{s.label}</a>
+        )
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .brand__name {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .brand__handle {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-link {
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+  }
+  .nav-link:hover {
+    color: var(--chip-software-text);
+    background: var(--chip-software-bg);
+    opacity: 1;
+  }
+  .nav-link[aria-current='page'] {
+    color: var(--chip-software-text);
+    background: var(--chip-software-bg);
+  }
+
+  .search-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px 7px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--rule-strong);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .search-pill:hover {
+    color: var(--text-soft);
+  }
+  .search-pill kbd {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    padding: 2px 6px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+  }
+
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+  .lang {
+    padding: 4px 6px;
+    color: var(--text-muted);
+    border-radius: 6px;
+  }
+  .lang[aria-current='true'] {
+    color: var(--accent-text);
+    font-weight: 500;
+  }
+  .lang__sep {
+    color: var(--rule-strong);
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-pill);
+    color: var(--text-soft);
+    border: 1px solid var(--rule-strong);
+  }
+  .theme-toggle:hover {
+    color: var(--text);
+  }
+  /* Icons render inside the Icon component's own style scope, so reach them with :global */
+  .theme-toggle :global(.i-moon) {
+    display: none;
+  }
+  :root[data-theme='dark'] .theme-toggle :global(.i-sun) {
+    display: none;
+  }
+  :root[data-theme='dark'] .theme-toggle :global(.i-moon) {
+    display: inline-block;
+  }
+
+  .btn-primary {
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    box-shadow: 0 8px 24px -8px rgba(232, 85, 127, 0.55);
+  }
+
+  .hamburger {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+    color: var(--chip-software-text);
+    background: var(--chip-software-bg);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---------- Drawer ---------- */
+  .drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 220ms var(--ease-out), visibility 0s linear 220ms;
+  }
+  .drawer[data-open] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 220ms var(--ease-out), visibility 0s;
+  }
+  .drawer__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 9, 42, 0.5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 220ms var(--ease-out);
+  }
+  .drawer[data-open] .drawer__scrim {
+    opacity: 1;
+  }
+  .drawer__panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3) clamp(var(--space-4), 4vw, var(--space-7)) calc(var(--space-6) + env(safe-area-inset-bottom));
+    background: linear-gradient(160deg, #1f1436 0%, #35194a 45%, #6e2a55 100%);
+    color: #fff;
+    overflow-y: auto;
+    transform: translateY(-12px) scale(0.985);
+    opacity: 0;
+    transform-origin: top right;
+    transition: transform 260ms var(--ease-out), opacity 200ms var(--ease-out);
+  }
+  .drawer[data-open] .drawer__panel {
+    transform: none;
+    opacity: 1;
+  }
+  .drawer__panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle 300px at 100% 0%, rgba(232, 85, 127, 0.35), transparent 60%),
+      radial-gradient(circle 320px at 0% 100%, rgba(124, 79, 219, 0.4), transparent 60%),
+      radial-gradient(circle 260px at 100% 100%, rgba(251, 186, 124, 0.2), transparent 60%);
+  }
+  .drawer__panel > * {
+    position: relative;
+  }
+  .drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .drawer__head .brand__name {
+    color: #fff;
+  }
+  /* Same 40x40 box + right inset as the hamburger, so it stays put on open */
+  .drawer__close {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  }
+  .drawer__close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+    opacity: 1;
+  }
+  .drawer__nav {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+  }
+  .drawer__nav a,
+  .drawer__nav button {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    transition: padding-left var(--motion-fast) var(--ease-out);
+  }
+  .drawer__nav a:hover,
+  .drawer__nav button:hover {
+    padding-left: 12px;
+    opacity: 1;
+  }
+  .drawer__nav span {
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    color: #fff;
+    transition: opacity var(--motion-fast) var(--ease-out);
+  }
+  .drawer__nav a:hover span,
+  .drawer__nav button:hover span {
+    opacity: 0.72;
+  }
+  .drawer__nav em {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color var(--motion-fast) var(--ease-out);
+  }
+  .drawer__nav a:hover em,
+  .drawer__nav button:hover em {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  /* Current page marker in the drawer */
+  .drawer__nav [aria-current='page'] span {
+    color: #fbba7c;
+  }
+  .drawer__nav [aria-current='page']::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 4px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--brand-gradient);
+    transform: translateY(-50%);
+  }
+  .drawer__nav a {
+    position: relative;
+  }
+  .drawer__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    padding-top: 20px;
+  }
+  .drawer__lang,
+  .drawer__themerow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .drawer__themebtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+  .drawer__themebtn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    opacity: 1;
+  }
+  .drawer__themebtn :global(.i-moon) {
+    display: none;
+  }
+  :root[data-theme='dark'] .drawer__themebtn :global(.i-sun) {
+    display: none;
+  }
+  :root[data-theme='dark'] .drawer__themebtn :global(.i-moon) {
+    display: inline-block;
+  }
+  .drawer__langlabel {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .drawer__lang .lang {
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.75rem;
+  }
+  .drawer__lang .lang[aria-current='true'] {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  .drawer__news {
+    display: block;
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(125deg, #7c4fdb 0%, #e8557f 55%, #f19b7c 100%);
+    color: #fff;
+  }
+  .drawer__newslabel {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .drawer__newstitle {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.15;
+  }
+  .drawer__newscta {
+    display: inline-flex;
+    margin-top: 10px;
+    padding: 9px 14px;
+    border-radius: var(--radius-pill);
+    background: #fff;
+    color: #1f1436;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .drawer__social {
+    display: flex;
+    gap: 16px;
+    padding-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px) {
+    .nav-desktop {
+      display: none;
+    }
+    .hamburger {
+      display: inline-flex;
+    }
+  }
+</style>
+
+<script>
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]');
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-drawer-open]');
+  let lastFocused: HTMLElement | null = null;
+
+  function openDrawer() {
+    if (!drawer) return;
+    lastFocused = document.activeElement as HTMLElement;
+    drawer.removeAttribute('inert');
+    drawer.setAttribute('data-open', '');
+    document.body.style.overflow = 'hidden';
+    openBtn?.setAttribute('aria-expanded', 'true');
+    const first = drawer.querySelector<HTMLElement>('.drawer__close');
+    first?.focus();
+    document.addEventListener('keydown', onKey);
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.removeAttribute('data-open');
+    drawer.setAttribute('inert', '');
+    document.body.style.overflow = '';
+    openBtn?.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown', onKey);
+    lastFocused?.focus();
+  }
+  function onKey(e: KeyboardEvent) {
+    if (e.key === 'Escape') closeDrawer();
+    if (e.key === 'Tab' && drawer) {
+      const items = drawer.querySelectorAll<HTMLElement>('a[href], button');
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  openBtn?.addEventListener('click', openDrawer);
+  document.querySelectorAll('[data-drawer-close]').forEach((el) => el.addEventListener('click', closeDrawer));
+  // Close drawer when following an in-drawer link
+  drawer?.querySelectorAll('.drawer__nav a, .drawer__news').forEach((el) =>
+    el.addEventListener('click', () => setTimeout(closeDrawer, 0))
+  );
+
+  // Theme toggle (temporary until folded into the a11y panel)
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  document.querySelectorAll('[data-theme-toggle]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme') || (media.matches ? 'dark' : 'light');
+      const next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('theme', next);
+      } catch {}
+    })
+  );
+</script>

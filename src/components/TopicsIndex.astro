@@ -1,0 +1,165 @@
+---
+import Illustration from './Illustration.astro';
+import Chip from './Chip.astro';
+import { getPosts } from '../lib/posts';
+import { useTranslations, localizePath, tagLabel } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const tags = ['software', 'prodotto', 'imprenditoria', 'community'] as const;
+const posts = await getPosts(lang);
+const counts = Object.fromEntries(tags.map((tg) => [tg, posts.filter((p) => p.data.tag === tg).length]));
+const explore = lang === 'it' ? 'Esplora' : 'Explore';
+const entries = lang === 'it' ? 'post' : 'posts';
+---
+
+<div class="topics container">
+  <header class="topics__head">
+    <p class="topics__eyebrow">{t('nav.tags')}</p>
+    <h1 class="topics__title">{lang === 'it' ? 'Argomenti' : 'Topics'}</h1>
+    <p class="topics__sub">
+      {lang === 'it' ? 'Scegli un filo da seguire.' : 'Pick a thread to follow.'}
+    </p>
+  </header>
+
+  <div class="topics__grid">
+    {tags.map((tag) => (
+      <article class:list={['topic', `topic--${tag}`]}>
+        <div class="topic__media">
+          <Illustration tag={tag} />
+          <span class="topic__bar" aria-hidden="true"></span>
+        </div>
+        <div class="topic__body">
+          <div class="topic__meta">
+            <Chip tag={tag} label={tagLabel(tag, lang)} />
+            <span class="topic__count">{String(counts[tag]).padStart(2, '0')} {entries}</span>
+          </div>
+          <a class="topic__link" href={localizePath(`/argomenti/${tag}`, lang)}>
+            {explore} <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </article>
+    ))}
+  </div>
+</div>
+
+<style>
+  .topics {
+    padding-block: var(--space-6) var(--space-8);
+  }
+  .topics__head {
+    padding-block: var(--space-4) var(--space-6);
+    text-align: center;
+  }
+  .topics__eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  .topics__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    color: var(--text);
+  }
+  .topics__sub {
+    margin-top: var(--space-2);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--text-soft);
+  }
+  .topics__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+  }
+  .topic {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .topic:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop), var(--shadow-card);
+  }
+  .topic__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .topic:focus-within {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .topic__media {
+    position: relative;
+    height: 150px;
+    background: var(--illus-bg);
+  }
+  .topic--software {
+    --illus-bg: var(--illus-software-bg);
+    --bar: linear-gradient(90deg, #7c4fdb, #b39ddb);
+  }
+  .topic--prodotto {
+    --illus-bg: var(--illus-prodotto-bg);
+    --bar: linear-gradient(90deg, #e8557f, #f19b7c);
+  }
+  .topic--imprenditoria {
+    --illus-bg: var(--illus-imprenditoria-bg);
+    --bar: linear-gradient(90deg, #f19b7c, #fbba7c);
+  }
+  .topic--community {
+    --illus-bg: var(--illus-community-bg);
+    --bar: linear-gradient(90deg, #7c4fdb, #8f9bff);
+  }
+  .topic__bar {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    background: var(--bar);
+  }
+  .topic__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+  }
+  .topic__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .topic__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .topic__link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    white-space: nowrap;
+  }
+  @media (max-width: 760px) {
+    .topics__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

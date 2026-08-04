@@ -1,0 +1,133 @@
+---
+import Icon from './Icon.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="lightbox" data-lightbox inert>
+  <div class="lightbox__scrim" data-lightbox-close></div>
+  <figure class="lightbox__figure" role="dialog" aria-modal="true" aria-label={t('email.title')}>
+    <img data-lightbox-img src="" alt="" loading="lazy" width="1200" height="800" />
+    <figcaption class="lightbox__cap" data-lightbox-cap></figcaption>
+  </figure>
+  <button type="button" class="lightbox__close" data-lightbox-close>
+    <Icon name="xmark" size={22} />
+    <span class="sr-only">{t('email.close')}</span>
+  </button>
+</div>
+
+<script>
+  const box = document.querySelector<HTMLElement>('[data-lightbox]');
+  if (box) {
+    const img = box.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const cap = box.querySelector<HTMLElement>('[data-lightbox-cap]');
+    let lastFocused: HTMLElement | null = null;
+
+    function open(src: string, alt: string) {
+      if (img) {
+        img.src = src;
+        img.alt = alt;
+      }
+      if (cap) cap.textContent = alt;
+      lastFocused = document.activeElement as HTMLElement;
+      box!.removeAttribute('inert');
+      box!.setAttribute('data-open', '');
+      document.body.style.overflow = 'hidden';
+      box!.querySelector<HTMLElement>('.lightbox__close')?.focus();
+      document.addEventListener('keydown', onKey);
+    }
+    function close() {
+      box!.removeAttribute('data-open');
+      box!.setAttribute('inert', '');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+      lastFocused?.focus();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') close();
+    }
+
+    box.querySelectorAll('[data-lightbox-close]').forEach((el) => el.addEventListener('click', close));
+
+    // Bind every article figure image as a zoomable target
+    document.querySelectorAll<HTMLImageElement>('.prose figure img').forEach((el) => {
+      el.style.cursor = 'zoom-in';
+      el.addEventListener('click', () => open(el.currentSrc || el.src, el.alt));
+    });
+  }
+</script>
+
+<style>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: clamp(var(--space-4), 4vw, var(--space-7));
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .lightbox[data-open] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 200ms var(--ease-out), visibility 0s;
+  }
+  .lightbox__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 9, 42, 0.62);
+    backdrop-filter: blur(8px);
+    cursor: zoom-out;
+  }
+  .lightbox__figure {
+    position: relative;
+    margin: 0;
+    max-width: min(92vw, 1100px);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    transform: scale(0.97);
+    transition: transform 220ms var(--ease-out);
+  }
+  .lightbox[data-open] .lightbox__figure {
+    transform: none;
+  }
+  .lightbox__figure img {
+    max-width: 100%;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    border-radius: var(--radius-md);
+    box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.6);
+  }
+  .lightbox__cap {
+    max-width: 60ch;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .lightbox__close {
+    position: absolute;
+    top: clamp(var(--space-3), 3vw, var(--space-5));
+    right: clamp(var(--space-3), 3vw, var(--space-5));
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  }
+  .lightbox__close:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: rotate(90deg);
+  }
+</style>

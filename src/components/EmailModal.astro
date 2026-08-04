@@ -1,0 +1,261 @@
+---
+import Icon from './Icon.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+// Email never appears in the static HTML. The user/domain are base64-encoded
+// into data attributes at build time and only reassembled by JS on click,
+// so naive scrapers reading the markup find no address to harvest.
+const EMAIL_USER = 'pietro';
+const EMAIL_DOMAIN = 'fabricators.ltd';
+// Reverse then base64 so a naive base64 decode of the attribute yields garbage.
+const enc = (s: string) => Buffer.from([...s].reverse().join('')).toString('base64');
+const u = enc(EMAIL_USER);
+const d = enc(EMAIL_DOMAIN);
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div id="email-modal" class="emodal" data-email-modal data-u={u} data-d={d} inert>
+  <div class="emodal__scrim" data-email-close></div>
+  <div class="emodal__card" role="dialog" aria-modal="true" aria-labelledby="email-modal-title">
+    <div class="emodal__head">
+      <span class="emodal__icon" aria-hidden="true">
+        <Icon name="mail" size={17} />
+      </span>
+      <div>
+        <p id="email-modal-title" class="emodal__title">{t('email.title')}</p>
+        <p class="emodal__hint">{t('email.hint')}</p>
+      </div>
+      <button type="button" class="emodal__close" data-email-close>
+        <Icon name="xmark" size={18} />
+        <span class="sr-only">{t('email.close')}</span>
+      </button>
+    </div>
+    <p class="emodal__address" data-email-address></p>
+    <div class="emodal__actions">
+      <button type="button" class="emodal__btn" data-email-copy data-copied={t('email.copied')}>{t('email.copy')}</button>
+      <button type="button" class="emodal__btn emodal__btn--primary brand-flow" data-email-open-client>{t('email.open')}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const modal = document.querySelector<HTMLElement>('[data-email-modal]');
+  if (modal) {
+    const dec = (s: string | null) => (s ? atob(s).split('').reverse().join('') : '');
+    const email = `${dec(modal.dataset.u ?? '')}@${dec(modal.dataset.d ?? '')}`;
+    const addr = modal.querySelector<HTMLAnchorElement>('[data-email-address]');
+    const client = modal.querySelector<HTMLAnchorElement>('[data-email-open-client]');
+    const copyBtn = modal.querySelector<HTMLButtonElement>('[data-email-copy]');
+    let lastFocused: HTMLElement | null = null;
+
+    function fill() {
+      if (addr) addr.textContent = email;
+    }
+    client?.addEventListener('click', () => {
+      window.location.href = `mailto:${email}`;
+    });
+    function open() {
+      lastFocused = document.activeElement as HTMLElement;
+      fill();
+      modal!.removeAttribute('inert');
+      modal!.setAttribute('data-open', '');
+      document.body.style.overflow = 'hidden';
+      modal!.querySelector<HTMLElement>('.emodal__close')?.focus();
+      document.addEventListener('keydown', onKey);
+    }
+    function close() {
+      modal!.removeAttribute('data-open');
+      modal!.setAttribute('inert', '');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+      lastFocused?.focus();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') {
+        const items = modal!.querySelectorAll<HTMLElement>('a[href], button');
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    document.querySelectorAll('[data-email-open]').forEach((el) =>
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        open();
+      })
+    );
+    modal.querySelectorAll('[data-email-close]').forEach((el) => el.addEventListener('click', close));
+
+    const COPIED_MS = 1600;
+    let copyTimer: ReturnType<typeof setTimeout> | undefined;
+    copyBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(email);
+        const prev = copyBtn.dataset.idle || copyBtn.textContent || '';
+        copyBtn.dataset.idle = prev;
+        copyBtn.textContent = copyBtn.dataset.copied || 'Copied';
+        // Restart the fill animation cleanly if clicked again mid-timer
+        copyBtn.classList.remove('is-copied');
+        void copyBtn.offsetWidth;
+        copyBtn.style.setProperty('--copied-ms', `${COPIED_MS}ms`);
+        copyBtn.classList.add('is-copied');
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => {
+          copyBtn.textContent = copyBtn.dataset.idle || 'Copy';
+          copyBtn.classList.remove('is-copied');
+        }, COPIED_MS);
+      } catch {}
+    });
+  }
+</script>
+
+<style>
+  .emodal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .emodal[data-open] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 200ms var(--ease-out), visibility 0s;
+  }
+  .emodal__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 9, 42, 0.42);
+    backdrop-filter: blur(6px);
+  }
+  .emodal__card {
+    position: relative;
+    width: min(420px, 100%);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-5);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 240ms var(--ease-out);
+  }
+  .emodal[data-open] .emodal__card {
+    transform: none;
+  }
+  :root[data-theme='dark'] .emodal__card {
+    background: #1a1330;
+  }
+  .emodal__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .emodal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    color: #fff;
+    background: var(--brand-gradient);
+    flex-shrink: 0;
+  }
+  .emodal__title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--text-lg);
+    color: var(--text);
+  }
+  .emodal__hint {
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .emodal__close {
+    margin-left: auto;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    background: var(--chip-software-bg);
+    color: var(--chip-software-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .emodal__address {
+    display: block;
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+    text-align: center;
+    word-break: break-all;
+  }
+  .emodal__actions {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .emodal__btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    text-align: center;
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule-strong);
+    color: var(--text-soft);
+    transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+  }
+  /* Secondary (Copy) only — the primary keeps its brand-flow gradient on hover */
+  .emodal__btn:not(.emodal__btn--primary):hover {
+    background: var(--surface-2);
+    opacity: 1;
+  }
+  /* Timer fill: sweeps left→right for --copied-ms, in sync with the text reset */
+  .emodal__btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--chip-software-bg);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  .emodal__btn.is-copied {
+    color: var(--chip-software-text);
+    border-color: currentColor;
+  }
+  .emodal__btn.is-copied::before {
+    animation: btn-timer var(--copied-ms, 1600ms) linear forwards;
+  }
+  .emodal__btn--primary {
+    border: none;
+    color: #fff;
+  }
+</style>

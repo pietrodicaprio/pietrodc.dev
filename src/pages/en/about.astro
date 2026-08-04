@@ -1,0 +1,10 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import About from '../../components/About.astro';
+import { useTranslations } from '../../i18n/utils';
+const t = useTranslations('en');
+---
+
+<SiteLayout title={t('nav.about')} description={t('home.sub')}>
+  <About lang="en" />
+</SiteLayout>

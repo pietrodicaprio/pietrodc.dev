@@ -1,0 +1,74 @@
+---
+// Category chip. Renders as a link when href is set, otherwise a static span.
+type Tag = 'software' | 'prodotto' | 'imprenditoria' | 'community';
+interface Props {
+  tag?: Tag;
+  label: string;
+  href?: string;
+  active?: boolean;
+  /** "all" style for the neutral filter pill. */
+  neutral?: boolean;
+  class?: string;
+}
+const { tag, label, href, active = false, neutral = false, class: className } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag
+  href={href}
+  class:list={['chip', !active && tag && `chip--${tag}`, { 'chip--active': active, 'brand-flow': active, 'chip--neutral': neutral && !active }, className]}
+  aria-current={active && href ? 'true' : undefined}
+>
+  {label}
+</Tag>
+
+<style>
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 11px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: opacity var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out);
+  }
+  a.chip {
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out),
+      filter var(--motion-fast) var(--ease-out);
+  }
+  a.chip:not(.chip--active):hover {
+    opacity: 1;
+    transform: translateY(-1px);
+    filter: brightness(0.96) saturate(1.08);
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+  .chip--software {
+    background: var(--chip-software-bg);
+    color: var(--chip-software-text);
+  }
+  .chip--prodotto {
+    background: var(--chip-prodotto-bg);
+    color: var(--chip-prodotto-text);
+  }
+  .chip--imprenditoria {
+    background: var(--chip-imprenditoria-bg);
+    color: var(--chip-imprenditoria-text);
+  }
+  .chip--community {
+    background: var(--chip-community-bg);
+    color: var(--chip-community-text);
+  }
+  .chip--neutral {
+    background: transparent;
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--rule-strong);
+  }
+  /* Active filter pill = animated brand gradient (see .brand-flow) */
+  .chip--active {
+    color: #fff;
+    box-shadow: none;
+  }
+</style>

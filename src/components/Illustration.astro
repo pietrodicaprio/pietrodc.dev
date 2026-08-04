@@ -1,0 +1,97 @@
+---
+// Category line-art, lifted from the Trama home cards. Primary ink uses
+// currentColor (driven by --illus-stroke-*) so it reads in light and dark;
+// the soft translucent ellipses/accents stay as authored.
+interface Props {
+  tag: 'software' | 'prodotto' | 'imprenditoria' | 'community';
+  class?: string;
+}
+const { tag, class: className } = Astro.props;
+---
+
+<div class:list={['illus', `illus--${tag}`, className]} aria-hidden="true">
+  {tag === 'software' && (
+    <svg viewBox="0 0 220 130" preserveAspectRatio="xMidYMid meet">
+      <ellipse cx="80" cy="70" rx="60" ry="28" fill="#7C4FDB" opacity="0.12" />
+      <ellipse cx="155" cy="75" rx="50" ry="22" fill="#B39DDB" opacity="0.15" />
+      <path d="M52 55 L30 78 L52 100" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M168 55 L190 78 L168 100" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M130 45 Q110 78 90 110" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.85" />
+      <circle cx="42" cy="35" r="2.6" fill="#7C4FDB" opacity="0.7" />
+      <circle cx="180" cy="30" r="2" fill="#E8557F" opacity="0.7" />
+      <circle cx="205" cy="55" r="1.5" fill="#7C4FDB" opacity="0.5" />
+      <circle cx="20" cy="90" r="1.8" fill="#B39DDB" opacity="0.7" />
+    </svg>
+  )}
+  {tag === 'prodotto' && (
+    <svg viewBox="0 0 220 130" preserveAspectRatio="xMidYMid meet">
+      <ellipse cx="110" cy="80" rx="80" ry="30" fill="#F19B7C" opacity="0.13" />
+      <ellipse cx="130" cy="60" rx="55" ry="22" fill="#E8557F" opacity="0.10" />
+      <path d="M80 82 L110 68 L140 82 L140 108 L110 122 L80 108 Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" />
+      <path d="M80 82 L110 96 L140 82" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" />
+      <path d="M110 96 L110 122" stroke="currentColor" stroke-width="2" fill="none" />
+      <path d="M85 58 Q110 44 135 58 T175 50" stroke="#E8557F" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.85" />
+      <path d="M100 40 Q115 30 135 40" stroke="#F19B7C" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.85" />
+      <circle cx="50" cy="45" r="2.6" fill="#E8557F" opacity="0.7" />
+      <circle cx="188" cy="85" r="2.2" fill="#F19B7C" opacity="0.75" />
+      <circle cx="205" cy="35" r="1.5" fill="#E8557F" opacity="0.55" />
+    </svg>
+  )}
+  {tag === 'community' && (
+    <svg viewBox="0 0 220 130" preserveAspectRatio="xMidYMid meet">
+      <ellipse cx="110" cy="82" rx="82" ry="28" fill="#8f9bff" opacity="0.12" />
+      <ellipse cx="112" cy="66" rx="56" ry="20" fill="#7c4fdb" opacity="0.08" />
+      <path d="M110 72 L70 50 M110 72 L152 50 M110 72 L78 104 M110 72 L146 104 M70 50 L152 50" stroke="currentColor" stroke-width="1.6" fill="none" opacity="0.5" />
+      <circle cx="110" cy="72" r="10" fill="#8f9bff" opacity="0.22" />
+      <circle cx="110" cy="72" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+      <circle cx="70" cy="50" r="6.5" stroke="currentColor" stroke-width="2" fill="none" />
+      <circle cx="152" cy="50" r="6.5" stroke="currentColor" stroke-width="2" fill="none" />
+      <circle cx="78" cy="104" r="6" stroke="currentColor" stroke-width="1.8" fill="none" />
+      <circle cx="146" cy="104" r="6" stroke="currentColor" stroke-width="1.8" fill="none" />
+      <circle cx="40" cy="40" r="2.4" fill="#8f9bff" opacity="0.7" />
+      <circle cx="190" cy="92" r="2" fill="#7c4fdb" opacity="0.6" />
+      <circle cx="200" cy="42" r="1.6" fill="#8f9bff" opacity="0.5" />
+    </svg>
+  )}
+  {tag === 'imprenditoria' && (
+    <svg viewBox="0 0 220 130" preserveAspectRatio="xMidYMid meet">
+      <ellipse cx="110" cy="82" rx="82" ry="30" fill="#F19B7C" opacity="0.12" />
+      <ellipse cx="100" cy="92" rx="60" ry="20" fill="#FBBA7C" opacity="0.22" />
+      <path d="M20 110 Q110 100 200 110" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.7" />
+      <path d="M110 108 Q108 82 118 55" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" />
+      <path d="M118 60 Q100 55 92 40 Q108 47 118 60 Z" fill="#F19B7C" opacity="0.75" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+      <path d="M118 60 Q135 56 143 42 Q128 50 118 60 Z" fill="#FBBA7C" opacity="0.9" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
+      <circle cx="170" cy="38" r="11" fill="#FBBA7C" opacity="0.5" />
+      <circle cx="170" cy="38" r="7.5" stroke="currentColor" stroke-width="1.4" fill="none" />
+      <path d="M170 18 v4 M170 54 v4 M150 38 h4 M186 38 h4 M156 24 l3 3 M182 52 l3 3 M156 52 l3 -3 M182 24 l3 -3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <circle cx="45" cy="42" r="2.2" fill="#F19B7C" opacity="0.7" />
+      <circle cx="200" cy="90" r="1.6" fill="currentColor" opacity="0.4" />
+    </svg>
+  )}
+</div>
+
+<style>
+  .illus {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .illus svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .illus--software {
+    color: var(--illus-stroke-software);
+  }
+  .illus--prodotto {
+    color: var(--illus-stroke-prodotto);
+  }
+  .illus--imprenditoria {
+    color: var(--illus-stroke-imprenditoria);
+  }
+  .illus--community {
+    color: var(--illus-stroke-community);
+  }
+</style>

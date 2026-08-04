@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pietrodc",
+  "account_id": "646e0454a81550ecf7f27a9e89e76fcd",
+  "compatibility_date": "2026-08-03",
+  "compatibility_flags": ["nodejs_compat"],
+  // Unified adapter entrypoint (Astro 6+). Static assets are wired automatically.
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  // Keep the short workers.dev preview URL (pietrodc.<subdomain>.workers.dev).
+  // The custom domain pietrodc.dev is added later, not here.
+  "workers_dev": true,
+  "observability": { "enabled": true }
+
+  // Newsletter (Phase 6) will add a D1 binding here. Left out for now so a
+  // preview deploy doesn't require an existing database:
+  //   pnpm wrangler d1 create pietrodc-newsletter
+  //   -> paste the returned database_id, then re-add:
+  // "d1_databases": [
+  //   { "binding": "DB", "database_name": "pietrodc-newsletter", "database_id": "<id>" }
+  // ]
+}

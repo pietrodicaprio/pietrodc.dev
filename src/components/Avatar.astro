@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+import pietro from '../assets/pietro.png';
+
+interface Props {
+  size?: number;
+  alt?: string;
+  glow?: boolean;
+  /** Above-the-fold avatar (e.g. header): load eagerly to help LCP. */
+  eager?: boolean;
+  class?: string;
+}
+const { size = 40, alt = 'Pietro Di Caprio', glow = false, eager = false, class: className } = Astro.props;
+---
+
+<span class:list={['avatar', { 'avatar--glow': glow }, className]} style={`--size:${size}px`}>
+  <span class="avatar__ring" aria-hidden="true"></span>
+  <span class="avatar__inner">
+    <Image
+      src={pietro}
+      alt={alt}
+      width={size * 2}
+      height={size * 2}
+      loading="eager"
+      {...(eager ? { fetchpriority: 'high' } : {})}
+    />
+  </span>
+</span>
+
+<style>
+  /* Conic gradient ring + photo. The soft glow is a box-shadow (always
+     clipped to the circle) instead of a blurred pseudo — that blurred
+     pseudo rendered as a square in WebKit. On hover the ring's hues
+     rotate and the glow deepens; both are square-proof in every engine. */
+  .avatar {
+    position: relative;
+    display: inline-block;
+    width: var(--size);
+    height: var(--size);
+    flex-shrink: 0;
+  }
+  .avatar__ring,
+  .avatar__inner {
+    position: absolute;
+    border-radius: 50%;
+  }
+  .avatar__ring {
+    inset: 0;
+    background: conic-gradient(from 0deg, #7c4fdb, #e8557f, #f19b7c, #fbba7c, #8f9bff, #b39ddb, #7c4fdb);
+    transition: box-shadow var(--transition);
+  }
+  .avatar--glow .avatar__ring {
+    box-shadow: 0 3px 14px -3px rgba(124, 79, 219, 0.45), 0 3px 14px -3px rgba(232, 85, 127, 0.3);
+  }
+  .avatar__inner {
+    inset: 2px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .avatar__inner :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+  }
+
+  /* Hover: astral hue sweep + a brighter halo (box-shadow, never square) */
+  .avatar:hover .avatar__ring {
+    animation: av-spin 7s linear infinite;
+  }
+  .avatar--glow:hover .avatar__ring {
+    box-shadow: 0 5px 22px -3px rgba(124, 79, 219, 0.6), 0 5px 22px -3px rgba(232, 85, 127, 0.45),
+      0 0 10px rgba(143, 155, 255, 0.35);
+  }
+  @keyframes av-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

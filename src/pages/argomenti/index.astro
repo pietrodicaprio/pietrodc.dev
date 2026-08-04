@@ -1,0 +1,10 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import TopicsIndex from '../../components/TopicsIndex.astro';
+import { useTranslations } from '../../i18n/utils';
+const t = useTranslations('it');
+---
+
+<SiteLayout title={t('nav.tags')}>
+  <TopicsIndex lang="it" />
+</SiteLayout>

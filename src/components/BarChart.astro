@@ -1,0 +1,162 @@
+---
+// Static, accessible horizontal bar chart. Gradient-filled bars, an x-axis
+// with ticks, and value labels kept in a neutral colour for readability.
+// Rendered at build time as inline SVG (zero client JS).
+interface Bar {
+  label: string;
+  value: number;
+}
+interface Props {
+  fig?: string;
+  title?: string;
+  unit?: string;
+  data: Bar[];
+  caption?: string;
+  meta?: string;
+}
+const { fig, title, unit = '', data, caption, meta } = Astro.props;
+
+const rawMax = Math.max(...data.map((d) => d.value));
+const step = 20;
+const axisMax = Math.max(step, Math.ceil(rawMax / step) * step);
+
+// Geometry (SVG user units)
+const rowH = 30;
+const rowGap = 14;
+const labelW = 62;
+const valueW = 54;
+const chartW = 560;
+const barMaxW = chartW - labelW - valueW;
+const axisPad = 26; // space under bars for the x-axis
+const chartTop = 6;
+const barsH = data.length * (rowH + rowGap) - rowGap;
+const height = chartTop + barsH + axisPad;
+const axisY = chartTop + barsH + 8;
+
+// Each bar gets a horizontal gradient (deeper → lighter) in its hue.
+const palette = [
+  ['#6a3fd0', '#a68ee8'],
+  ['#7c4fdb', '#b9a6e6'],
+  ['#d6436e', '#f19bb2'],
+  ['#ec8a63', '#f6bda2'],
+  ['#f0a85e', '#ffd8a6'],
+];
+
+const bars = data.map((d, i) => ({
+  ...d,
+  y: chartTop + i * (rowH + rowGap),
+  w: Math.max(3, (d.value / axisMax) * barMaxW),
+  grad: palette[i % palette.length],
+}));
+
+const ticks = [];
+for (let v = 0; v <= axisMax; v += step) ticks.push({ v, x: labelW + (v / axisMax) * barMaxW });
+
+const header = `${fig ? `FIG. ${fig} · ` : ''}${title ?? ''}${unit ? ` — ${unit}` : ''}`.toUpperCase();
+const a11yLabel =
+  (title ? title + '. ' : '') + data.map((d) => `${d.label}: ${d.value}${unit ? ' ' + unit : ''}`).join(', ');
+const gid = `bc-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<figure class="chart">
+  {(header || meta) && (
+    <figcaption class="chart__bar">
+      {header && <span class="chart__title">{header}</span>}
+      {meta && <span class="chart__meta">{meta}</span>}
+    </figcaption>
+  )}
+
+  <svg class="chart__svg" viewBox={`0 0 ${chartW} ${height}`} role="img" aria-label={a11yLabel} preserveAspectRatio="xMinYMin meet">
+    <defs>
+      {bars.map((b, i) => (
+        <linearGradient id={`${gid}-${i}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color={b.grad[0]} />
+          <stop offset="1" stop-color={b.grad[1]} />
+        </linearGradient>
+      ))}
+    </defs>
+
+    {/* Bars */}
+    {bars.map((b, i) => (
+      <g>
+        <text x={labelW - 12} y={b.y + rowH / 2} text-anchor="end" dominant-baseline="middle" class="chart__label">{b.label}</text>
+        <rect x={labelW} y={b.y} width={b.w} height={rowH} rx="7" fill={`url(#${gid}-${i})`}>
+          <title>{b.label}: {b.value}{unit ? ' ' + unit : ''}</title>
+        </rect>
+        <text x={labelW + b.w + 10} y={b.y + rowH / 2} dominant-baseline="middle" class="chart__value">
+          {b.value}{unit ? ' ' + unit : ''}
+        </text>
+      </g>
+    ))}
+
+    {/* X-axis */}
+    <line x1={labelW} y1={chartTop} x2={labelW} y2={axisY} class="chart__axis" />
+    <line x1={labelW} y1={axisY} x2={chartW - valueW} y2={axisY} class="chart__axis" />
+    {ticks.map((tk) => (
+      <text x={tk.x} y={axisY + 14} text-anchor="middle" class="chart__tick">{tk.v}</text>
+    ))}
+  </svg>
+
+  {caption && <figcaption class="chart__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .chart {
+    margin-block: 1.6em;
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--rule);
+    background: var(--surface-2);
+  }
+  .chart__bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .chart__title,
+  .chart__meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .chart__title {
+    color: var(--text-soft);
+  }
+  .chart__meta {
+    color: var(--text-muted);
+  }
+  .chart__svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .chart__label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--text-soft);
+  }
+  .chart__value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--text-muted);
+  }
+  .chart__axis {
+    stroke: var(--rule-strong);
+    stroke-width: 1;
+  }
+  .chart__tick {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--text-muted);
+  }
+  .chart__caption {
+    margin-top: var(--space-4);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-base);
+    color: var(--text-soft);
+  }
+</style>

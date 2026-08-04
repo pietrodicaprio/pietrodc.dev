@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import Home from '../../components/Home.astro';
+import { getPosts } from '../../lib/posts';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts('en');
+  return paginate(posts, { pageSize: 6 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+---
+
+<SiteLayout>
+  <Home lang="en" page={page} />
+</SiteLayout>

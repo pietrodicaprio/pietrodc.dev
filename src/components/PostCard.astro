@@ -1,0 +1,149 @@
+---
+import Chip from './Chip.astro';
+import Illustration from './Illustration.astro';
+import { formatDate, readingTime, type Post } from '../lib/posts';
+import { localizePath, useTranslations, tagLabel } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  post: Post;
+  lang: Lang;
+}
+const { post, lang } = Astro.props;
+const t = useTranslations(lang);
+const { tag } = post.data;
+const href = localizePath(`/blog/${post.slug}`, lang);
+const mins = readingTime(post);
+---
+
+<article class:list={['card', `card--${tag}`]}>
+  <div class="card__media">
+    <Illustration tag={tag} />
+    <span class="card__bar" aria-hidden="true"></span>
+  </div>
+  <div class="card__body">
+    <div class="card__meta">
+      <Chip tag={tag} label={tagLabel(tag, lang)} />
+      <time class="card__date" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+    </div>
+    <h3 class="card__title">
+      <a href={href} class="card__link">{post.data.title}</a>
+    </h3>
+    <p class="card__excerpt">{post.data.excerpt}</p>
+    <div class="card__foot">
+      <span class="card__read">{t('post.readMore')} <span aria-hidden="true">→</span></span>
+      <span class="card__mins">{mins} {t('post.min')}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop), var(--shadow-card);
+  }
+  /* Whole-card click target, single link in the a11y tree */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .card:focus-within {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+  .card__link:focus-visible {
+    outline: none;
+  }
+
+  .card__media {
+    position: relative;
+    height: 148px;
+    background: var(--illus-bg);
+  }
+  .card--software {
+    --illus-bg: var(--illus-software-bg);
+    --bar: linear-gradient(90deg, #7c4fdb, #b39ddb);
+  }
+  .card--prodotto {
+    --illus-bg: var(--illus-prodotto-bg);
+    --bar: linear-gradient(90deg, #e8557f, #f19b7c);
+  }
+  .card--imprenditoria {
+    --illus-bg: var(--illus-imprenditoria-bg);
+    --bar: linear-gradient(90deg, #f19b7c, #fbba7c);
+  }
+  .card--community {
+    --illus-bg: var(--illus-community-bg);
+    --bar: linear-gradient(90deg, #7c4fdb, #8f9bff);
+  }
+  .card__bar {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    background: var(--bar);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 22px 20px;
+  }
+  .card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card__date {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+  .card__title {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+    color: var(--text);
+  }
+  .card__link {
+    color: inherit;
+  }
+  .card:hover .card__link {
+    color: var(--accent-text);
+  }
+  .card__excerpt {
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
+  .card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule-strong);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .card__read {
+    color: var(--accent-text);
+  }
+</style>

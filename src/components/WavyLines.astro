@@ -1,0 +1,45 @@
+---
+// Decorative "trama" weave — several flowing strands in the brand gradient.
+// Authored in a wide 1440x360 viewBox so the curves keep their shape when the
+// element is stretched across a full-width band (preserveAspectRatio=none).
+interface Props {
+  variant?: 'gradient' | 'light';
+  class?: string;
+}
+const { variant = 'gradient', class: className } = Astro.props;
+const id = `wg-${Math.random().toString(36).slice(2, 8)}`;
+const stroke = variant === 'light' ? 'rgba(255,255,255,0.5)' : `url(#${id})`;
+
+const strands = [
+  { d: 'M-60,150 C240,70 480,230 760,150 C1000,80 1220,220 1500,150', w: 1.1 },
+  { d: 'M-60,190 C240,110 480,270 760,190 C1000,120 1220,260 1500,190', w: 0.8 },
+  { d: 'M-60,120 C280,50 520,200 820,120 C1080,55 1280,190 1520,120', w: 0.6 },
+  { d: 'M-60,232 C260,150 520,322 820,232 C1080,160 1280,300 1520,232', w: 0.9 },
+  { d: 'M-60,92 C300,30 600,160 940,92 C1200,35 1360,150 1540,92', w: 0.55 },
+  { d: 'M-60,272 C300,200 600,350 940,272 C1200,205 1360,330 1540,272', w: 0.7 },
+];
+---
+
+<svg class:list={['waves', className]} viewBox="0 0 1440 360" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  {variant === 'gradient' && (
+    <defs>
+      <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#7C4FDB" stop-opacity="0.5"></stop>
+        <stop offset="0.5" stop-color="#E8557F" stop-opacity="0.42"></stop>
+        <stop offset="1" stop-color="#FBBA7C" stop-opacity="0.38"></stop>
+      </linearGradient>
+    </defs>
+  )}
+  {strands.map((s) => <path d={s.d} stroke={stroke} stroke-width={s.w} fill="none" />)}
+</svg>
+
+<style>
+  .waves {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: var(--wave-opacity);
+  }
+</style>

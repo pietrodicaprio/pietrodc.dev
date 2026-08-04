@@ -1,0 +1,170 @@
+---
+import PostCard from './PostCard.astro';
+import Chip from './Chip.astro';
+import NewsletterCTA from './NewsletterCTA.astro';
+import WavyLines from './WavyLines.astro';
+import Pagination from './Pagination.astro';
+import { getPosts, readingTime, type Post } from '../lib/posts';
+import { useTranslations, localizePath, tagLabel } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Astro paginate() result for this page. */
+  page: {
+    data: Post[];
+    currentPage: number;
+    lastPage: number;
+  };
+}
+const { lang, page } = Astro.props;
+const t = useTranslations(lang);
+const isFirst = page.currentPage === 1;
+
+// Totals across all posts (for the filter counter), independent of the page.
+const allPosts = await getPosts(lang);
+const totalMins = allPosts.reduce((sum, p) => sum + readingTime(p), 0);
+const count = String(allPosts.length).padStart(2, '0');
+
+const tags = ['software', 'prodotto', 'imprenditoria', 'community'] as const;
+const makeUrl = (n: number) => (n === 1 ? localizePath('/', lang) : localizePath(`/${n}`, lang));
+---
+
+<div class="home container">
+  {isFirst && (
+    <div class="home__weave" aria-hidden="true">
+      <WavyLines />
+    </div>
+  )}
+
+  {isFirst && (
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__titlewrap">
+        <span class="hero__dash" aria-hidden="true"></span>
+        <h1 id="hero-title" class="hero__title">{t('home.title')}</h1>
+        <span class="hero__dash hero__dash--r" aria-hidden="true"></span>
+      </div>
+      <p class="hero__sub">{t('home.sub')}</p>
+    </section>
+  )}
+
+  <section class="filter" aria-label={t('nav.tags')}>
+    <span class="filter__label">{t('nav.tags')} /</span>
+    <Chip label={t('home.allTag')} href={localizePath('/', lang)} active neutral />
+    {tags.map((tag) => (
+      <Chip tag={tag} label={tagLabel(tag, lang)} href={localizePath(`/argomenti/${tag}`, lang)} />
+    ))}
+    <span class="filter__spacer"></span>
+    <span class="filter__count">
+      {count} {t('home.counter.posts')} · {totalMins} {t('home.counter.mins')}
+      {!isFirst && ` · ${t('home.counter.posts')} ${page.currentPage}/${page.lastPage}`}
+    </span>
+  </section>
+
+  <section class="grid" aria-label={t('home.title')}>
+    {page.data.map((post) => <PostCard post={post} lang={lang} />)}
+  </section>
+
+  <Pagination currentPage={page.currentPage} lastPage={page.lastPage} makeUrl={makeUrl} lang={lang} />
+
+  {isFirst && <NewsletterCTA lang={lang} />}
+</div>
+
+<style>
+  .home {
+    position: relative;
+    padding-block: var(--space-5) var(--space-6);
+  }
+  .home__weave {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    width: 100vw;
+    height: 620px;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+    --wave-opacity: 0.32;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 48%, transparent 92%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 48%, transparent 92%);
+  }
+  .home > :not(.home__weave) {
+    position: relative;
+    z-index: 1;
+  }
+  .hero {
+    text-align: center;
+    padding-block: var(--space-4) var(--space-6);
+  }
+  .hero__titlewrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-block: var(--space-3);
+  }
+  .hero__dash {
+    width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, #7c4fdb, #e8557f);
+  }
+  .hero__dash--r {
+    background: linear-gradient(90deg, #e8557f, #fbba7c);
+  }
+  .hero__title {
+    font-family: var(--font-serif);
+    font-size: var(--text-3xl);
+    color: var(--text);
+  }
+  .hero__sub {
+    max-width: 46ch;
+    margin-inline: auto;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--text-soft);
+  }
+
+  .filter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--rule);
+  }
+  .filter__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: var(--space-2);
+  }
+  .filter__spacer {
+    flex: 1;
+  }
+  .filter__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    padding-block: var(--space-6);
+  }
+  @media (max-width: 680px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .filter__spacer {
+      display: none;
+    }
+    .filter__count {
+      flex-basis: 100%;
+    }
+  }
+</style>

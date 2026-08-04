@@ -1,0 +1,529 @@
+---
+import Icon from './Icon.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// toggle: [storage key, html data-attribute, on-value, label, hint]
+const toggles = [
+  ['a11y-contrast', 'data-a11y-contrast', 'high', t('a11y.contrast'), ''],
+  ['a11y-motion', 'data-a11y-motion', 'off', t('a11y.motion'), t('a11y.motion.hint')],
+  ['a11y-dyslexia', 'data-a11y-dyslexia', 'on', t('a11y.dyslexia'), t('a11y.dyslexia.hint')],
+  ['a11y-leading', 'data-a11y-leading', 'on', t('a11y.leading'), t('a11y.leading.hint')],
+  ['a11y-underline', 'data-a11y-underline', 'on', t('a11y.underline'), t('a11y.underline.hint')],
+  ['a11y-focus', 'data-a11y-focus', 'extended', t('a11y.focus'), t('a11y.focus.hint')],
+] as const;
+
+const themes = [
+  ['light', t('a11y.theme.light')],
+  ['dark', t('a11y.theme.dark')],
+  ['system', t('a11y.theme.system')],
+] as const;
+---
+
+<button type="button" class="a11y-fab" data-a11y-open aria-haspopup="dialog" aria-controls="a11y-panel">
+  <Icon name="accessibility" size={24} />
+  <span class="sr-only">{t('a11y.open')}</span>
+</button>
+
+<div id="a11y-panel" class="a11y" data-a11y-modal inert>
+  <div class="a11y__scrim" data-a11y-close></div>
+  <div class="a11y__panel" role="dialog" aria-modal="true" aria-labelledby="a11y-title">
+    <header class="a11y__head">
+      <span class="a11y__icon" aria-hidden="true"><Icon name="accessibility" size={18} /></span>
+      <div class="a11y__titles">
+        <h2 id="a11y-title" class="a11y__title">{t('a11y.title')}</h2>
+        <p class="a11y__sub">{t('a11y.subtitle')}</p>
+      </div>
+      <button type="button" class="a11y__close" data-a11y-close>
+        <Icon name="xmark" size={16} />
+        <span class="sr-only">{t('a11y.done')}</span>
+      </button>
+    </header>
+
+    <div class="a11y__body">
+      <!-- Text size -->
+      <section class="a11y__section">
+        <div class="a11y__labelrow">
+          <span class="a11y__label">{t('a11y.textSize')}</span>
+          <span class="a11y__value" data-a11y-size-out>100%</span>
+        </div>
+        <div class="a11y__slider">
+          <span aria-hidden="true" class="a11y__aa a11y__aa--sm">A</span>
+          <input
+            type="range"
+            min="90"
+            max="150"
+            step="5"
+            value="100"
+            list="a11y-size-ticks"
+            data-a11y-size
+            aria-label={t('a11y.textSize')}
+          />
+          <span aria-hidden="true" class="a11y__aa a11y__aa--lg">A</span>
+        </div>
+        <datalist id="a11y-size-ticks">
+          <option value="90"></option>
+          <option value="100"></option>
+          <option value="110"></option>
+          <option value="125"></option>
+          <option value="150"></option>
+        </datalist>
+      </section>
+
+      <!-- Theme -->
+      <section class="a11y__section">
+        <span class="a11y__label">{t('a11y.theme')}</span>
+        <div class="a11y__seg" role="radiogroup" aria-label={t('a11y.theme')}>
+          {themes.map(([val, label]) => (
+            <button type="button" role="radio" aria-checked="false" class="a11y__segbtn" data-a11y-theme={val}>
+              <span class="a11y__aapreview" aria-hidden="true">Aa</span>
+              <span class="a11y__seglabel">{label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <!-- Toggles -->
+      <section class="a11y__section a11y__toggles">
+        {toggles.map(([key, attr, on, label, hint]) => (
+          <button
+            type="button"
+            role="switch"
+            aria-checked="false"
+            class="a11y__toggle"
+            data-a11y-toggle={key}
+            data-attr={attr}
+            data-on={on}
+          >
+            <span class="a11y__toglabels">
+              <span class="a11y__toglabel">{label}</span>
+              {hint && <span class="a11y__toghint">{hint}</span>}
+            </span>
+            <span class="a11y__switch" aria-hidden="true"></span>
+          </button>
+        ))}
+      </section>
+    </div>
+
+    <footer class="a11y__foot">
+      <button type="button" class="a11y__btn" data-a11y-reset>{t('a11y.reset')}</button>
+      <button type="button" class="a11y__btn a11y__btn--primary brand-flow" data-a11y-close>{t('a11y.done')}</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const root = document.documentElement;
+    const modal = document.querySelector<HTMLElement>('[data-a11y-modal]');
+    if (!modal) return;
+    const store = {
+      get: (k: string) => {
+        try {
+          return localStorage.getItem(k);
+        } catch {
+          return null;
+        }
+      },
+      set: (k: string, v: string) => {
+        try {
+          localStorage.setItem(k, v);
+        } catch {}
+      },
+      del: (k: string) => {
+        try {
+          localStorage.removeItem(k);
+        } catch {}
+      },
+    };
+
+    // ---- Text size ----
+    const slider = modal.querySelector<HTMLInputElement>('[data-a11y-size]');
+    const sizeOut = modal.querySelector<HTMLElement>('[data-a11y-size-out]');
+    function applySize(pct: number) {
+      const scale = (pct / 100).toFixed(2);
+      root.style.setProperty('--user-text-scale', scale);
+      store.set('a11y-textsize', scale);
+      if (sizeOut) sizeOut.textContent = pct + '%';
+      if (slider) slider.setAttribute('aria-valuetext', pct + '%');
+    }
+    slider?.addEventListener('input', () => applySize(Number(slider.value)));
+
+    // ---- Theme ----
+    const themeBtns = Array.from(modal.querySelectorAll<HTMLButtonElement>('[data-a11y-theme]'));
+    function currentTheme(): string {
+      return root.getAttribute('data-theme') || (store.get('theme') ? store.get('theme')! : 'system');
+    }
+    function applyTheme(val: string) {
+      if (val === 'system') {
+        root.removeAttribute('data-theme');
+        store.del('theme');
+      } else {
+        root.setAttribute('data-theme', val);
+        store.set('theme', val);
+      }
+      syncTheme();
+    }
+    function syncTheme() {
+      const cur = currentTheme();
+      themeBtns.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.a11yTheme === cur)));
+    }
+    themeBtns.forEach((b) => b.addEventListener('click', () => applyTheme(b.dataset.a11yTheme!)));
+
+    // ---- Toggles ----
+    const toggleBtns = Array.from(modal.querySelectorAll<HTMLButtonElement>('[data-a11y-toggle]'));
+    function applyToggle(btn: HTMLButtonElement, on: boolean) {
+      const key = btn.dataset.a11yToggle!;
+      const attr = btn.dataset.attr!;
+      const val = btn.dataset.on!;
+      btn.setAttribute('aria-checked', String(on));
+      if (on) {
+        root.setAttribute(attr, val);
+        store.set(key, val);
+      } else {
+        root.removeAttribute(attr);
+        store.del(key);
+      }
+    }
+    toggleBtns.forEach((btn) =>
+      btn.addEventListener('click', () => applyToggle(btn, btn.getAttribute('aria-checked') !== 'true'))
+    );
+
+    // ---- Sync UI to current state ----
+    function sync() {
+      const size = store.get('a11y-textsize');
+      const pct = size ? Math.round(parseFloat(size) * 100) : 100;
+      if (slider) slider.value = String(pct);
+      if (sizeOut) sizeOut.textContent = pct + '%';
+      syncTheme();
+      toggleBtns.forEach((btn) => btn.setAttribute('aria-checked', String(root.hasAttribute(btn.dataset.attr!))));
+    }
+
+    // ---- Reset ----
+    modal.querySelector('[data-a11y-reset]')?.addEventListener('click', () => {
+      ['a11y-contrast', 'a11y-motion', 'a11y-dyslexia', 'a11y-leading', 'a11y-underline', 'a11y-focus', 'a11y-textsize', 'theme'].forEach(store.del);
+      ['data-a11y-contrast', 'data-a11y-motion', 'data-a11y-dyslexia', 'data-a11y-leading', 'data-a11y-underline', 'data-a11y-focus', 'data-theme'].forEach((a) => root.removeAttribute(a));
+      root.style.removeProperty('--user-text-scale');
+      sync();
+    });
+
+    // ---- Open / close ----
+    let lastFocused: HTMLElement | null = null;
+    function open() {
+      lastFocused = document.activeElement as HTMLElement;
+      sync();
+      modal!.removeAttribute('inert');
+      modal!.setAttribute('data-open', '');
+      document.body.style.overflow = 'hidden';
+      modal!.querySelector<HTMLElement>('.a11y__close')?.focus();
+      document.addEventListener('keydown', onKey);
+    }
+    function close() {
+      modal!.removeAttribute('data-open');
+      modal!.setAttribute('inert', '');
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+      lastFocused?.focus();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') {
+        const items = modal!.querySelectorAll<HTMLElement>('button, input, a[href]');
+        const list = Array.from(items).filter((el) => !el.hasAttribute('disabled'));
+        if (!list.length) return;
+        const first = list[0];
+        const last = list[list.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    document.querySelectorAll('[data-a11y-open]').forEach((el) => el.addEventListener('click', open));
+    modal.querySelectorAll('[data-a11y-close]').forEach((el) => el.addEventListener('click', close));
+  })();
+</script>
+
+<style>
+  .a11y-fab {
+    position: fixed;
+    left: max(var(--space-4), env(safe-area-inset-left));
+    bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    z-index: 45;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-pill);
+    color: #fff;
+    background: var(--brand-gradient);
+    box-shadow: 0 10px 30px -8px rgba(124, 79, 219, 0.6);
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+  .a11y-fab:hover {
+    transform: translateY(-2px) scale(1.04);
+    opacity: 1;
+  }
+
+  .a11y {
+    position: fixed;
+    inset: 0;
+    z-index: 78;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .a11y[data-open] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 200ms var(--ease-out), visibility 0s;
+  }
+  .a11y__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 9, 42, 0.45);
+    backdrop-filter: blur(6px);
+  }
+  .a11y__panel {
+    position: relative;
+    width: min(440px, 100%);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transform: translateY(10px) scale(0.98);
+    transition: transform 220ms var(--ease-out);
+  }
+  .a11y[data-open] .a11y__panel {
+    transform: none;
+  }
+  :root[data-theme='dark'] .a11y__panel {
+    background: #1a1330;
+  }
+
+  .a11y__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--rule);
+  }
+  .a11y__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    color: #fff;
+    background: var(--brand-gradient);
+    flex-shrink: 0;
+  }
+  .a11y__title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--text-lg);
+    color: var(--text);
+  }
+  .a11y__sub {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--text-muted);
+  }
+  .a11y__close {
+    margin-left: auto;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    background: var(--chip-software-bg);
+    color: var(--chip-software-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .a11y__body {
+    padding: var(--space-4) var(--space-5);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .a11y__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .a11y__labelrow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .a11y__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .a11y__value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent-text);
+  }
+  .a11y__slider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .a11y__aa {
+    color: var(--text-muted);
+  }
+  .a11y__aa--sm {
+    font-size: 0.75rem;
+  }
+  .a11y__aa--lg {
+    font-size: 1.3rem;
+  }
+  .a11y__slider input[type='range'] {
+    flex: 1;
+    accent-color: var(--accent-purple);
+    height: 6px;
+  }
+
+  .a11y__seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .a11y__segbtn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: var(--surface-2);
+    text-align: left;
+    transition: border-color var(--motion-fast) var(--ease-out);
+  }
+  .a11y__segbtn[aria-checked='true'] {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 1px var(--accent-purple);
+  }
+  .a11y__aapreview {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .a11y__segbtn[data-a11y-theme='dark'] .a11y__aapreview {
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: #14092a;
+    color: #f0e9f5;
+  }
+  .a11y__seglabel {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .a11y__toggles {
+    gap: 0;
+  }
+  .a11y__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 100%;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+  }
+  .a11y__toggle:last-child {
+    border-bottom: 0;
+  }
+  .a11y__toglabels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .a11y__toglabel {
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .a11y__toghint {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--text-muted);
+  }
+  .a11y__switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 42px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--rule-strong);
+    transition: background var(--motion-fast) var(--ease-out);
+  }
+  .a11y__switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+  .a11y__toggle[aria-checked='true'] .a11y__switch {
+    background: var(--brand-gradient-h);
+  }
+  .a11y__toggle[aria-checked='true'] .a11y__switch::after {
+    transform: translateX(18px);
+  }
+
+  .a11y__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--rule);
+  }
+  .a11y__btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule-strong);
+    color: var(--text-soft);
+  }
+  .a11y__btn:hover {
+    background: var(--surface-2);
+    opacity: 1;
+  }
+  .a11y__btn--primary {
+    border: none;
+    color: #fff;
+  }
+</style>
