@@ -22,7 +22,6 @@
   color: var(--text);
   text-align: justify;
   text-align-last: left;
-  hyphens: auto;
 }
 
 /* Section headers: serif italic title with a deep-linkable "§ NN" anchor */
