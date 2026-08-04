@@ -2,13 +2,11 @@
 import type { GetStaticPaths } from 'astro';
 import SiteLayout from '../../../layouts/SiteLayout.astro';
 import Archive from '../../../components/Archive.astro';
-import { getPosts } from '../../../lib/posts';
+import { getPosts, getUsedTags, type Tag } from '../../../lib/posts';
 import { tagLabel } from '../../../i18n/utils';
 
-type Tag = 'software' | 'prodotto' | 'imprenditoria' | 'community';
-
 export const getStaticPaths = (async ({ paginate }) => {
-  const tags: Tag[] = ['software', 'prodotto', 'imprenditoria', 'community'];
+  const tags = await getUsedTags('it');
   const posts = await getPosts('it');
   return tags.flatMap((tag) =>
     paginate(

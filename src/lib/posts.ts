@@ -14,6 +14,16 @@ function parseId(id: string): { lang: Lang; slug: string } {
 
 const isProd = import.meta.env.PROD;
 
+export const TAG_ORDER = ['software', 'prodotto', 'imprenditoria', 'community'] as const;
+export type Tag = (typeof TAG_ORDER)[number];
+
+/** Tags that actually have at least one visible post, in canonical order. */
+export async function getUsedTags(lang: Lang): Promise<Tag[]> {
+  const posts = await getPosts(lang);
+  const used = new Set(posts.map((p) => p.data.tag as Tag));
+  return TAG_ORDER.filter((tag) => used.has(tag));
+}
+
 /** All non-draft posts for a locale, newest first. */
 export async function getPosts(lang: Lang): Promise<Post[]> {
   const all = await getCollection('blog', ({ id, data }) => {

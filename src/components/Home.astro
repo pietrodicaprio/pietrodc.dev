@@ -4,7 +4,7 @@ import Chip from './Chip.astro';
 import NewsletterCTA from './NewsletterCTA.astro';
 import WavyLines from './WavyLines.astro';
 import Pagination from './Pagination.astro';
-import { getPosts, readingTime, type Post } from '../lib/posts';
+import { getPosts, getUsedTags, readingTime, type Post } from '../lib/posts';
 import { useTranslations, localizePath, tagLabel } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -26,7 +26,7 @@ const allPosts = await getPosts(lang);
 const totalMins = allPosts.reduce((sum, p) => sum + readingTime(p), 0);
 const count = String(allPosts.length).padStart(2, '0');
 
-const tags = ['software', 'prodotto', 'imprenditoria', 'community'] as const;
+const tags = await getUsedTags(lang);
 const makeUrl = (n: number) => (n === 1 ? localizePath('/', lang) : localizePath(`/${n}`, lang));
 ---
 

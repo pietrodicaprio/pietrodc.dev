@@ -1,7 +1,7 @@
 ---
 import Illustration from './Illustration.astro';
 import Chip from './Chip.astro';
-import { getPosts } from '../lib/posts';
+import { getPosts, getUsedTags } from '../lib/posts';
 import { useTranslations, localizePath, tagLabel } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -10,7 +10,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const tags = ['software', 'prodotto', 'imprenditoria', 'community'] as const;
+const tags = await getUsedTags(lang);
 const posts = await getPosts(lang);
 const counts = Object.fromEntries(tags.map((tg) => [tg, posts.filter((p) => p.data.tag === tg).length]));
 const explore = lang === 'it' ? 'Esplora' : 'Explore';
